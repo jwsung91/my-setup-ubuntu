@@ -67,6 +67,9 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 # Run only selected steps
 ./setup.sh run proxy system applications shell appearance tools python editor dev-auth config verify
 
+# Pass step-specific arguments with step:arg1,arg2
+./setup.sh run proxy:use,work applications:all python:3.12.11 config:all verify
+
 # Choose and activate a proxy profile
 ./scripts/proxy.sh
 
@@ -90,6 +93,7 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 - `./setup.sh select` lets you choose steps one by one.
 - `./setup.sh full` runs the full setup in the default order.
 - `./setup.sh run ...` runs only the steps you specify.
+- `./setup.sh run step:arg1,arg2 ...` passes arguments through to individual steps.
 - `setup.sh` supports both interactive selection and explicit step arguments.
 - Several steps are written to be re-runnable and will reuse already installed components when possible.
 - The default full setup order is `proxy -> system -> applications -> shell -> appearance -> tools -> python -> editor -> dev-auth -> config -> verify`.

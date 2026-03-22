@@ -16,6 +16,7 @@ Usage:
   ./setup.sh full           Run every setup step in order
   ./setup.sh all            Run every setup step in order
   ./setup.sh run proxy system applications shell   Run only selected steps
+  ./setup.sh run python:3.12.11 config:all verify  Run steps with step-specific args
 
 Available steps:
   proxy         Activate a proxy profile for networked steps
@@ -36,7 +37,6 @@ EOF
 run_step() {
     local step="$1"
     shift || true
-    RAN_ANY_STEP=1
 
     case "$step" in
         proxy)
@@ -83,6 +83,61 @@ run_step() {
     esac
 }
 
+step_counts_as_setup() {
+    local step="$1"
+    shift || true
+
+    case "$step" in
+        system|applications|shell|appearance|tools|editor|dev-auth|config|restore)
+            return 0
+            ;;
+        proxy)
+            case "${1:-interactive}" in
+                list|--help|-h)
+                    return 1
+                    ;;
+                *)
+                    return 0
+                    ;;
+            esac
+            ;;
+        python)
+            case "${1:-}" in
+                --help|-h)
+                    return 1
+                    ;;
+                *)
+                    return 0
+                    ;;
+            esac
+            ;;
+        verify)
+            return 1
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
+
+run_step_spec() {
+    local spec="$1"
+    local step="${spec%%:*}"
+    local args_string=""
+    local -a step_args=()
+
+    if [[ "$spec" == *:* ]]; then
+        args_string="${spec#*:}"
+        IFS=',' read -r -a step_args <<< "$args_string"
+    fi
+
+    if step_counts_as_setup "$step" "${step_args[@]}"; then
+        RAN_ANY_STEP=1
+    fi
+
+    run_step "$step" "${step_args[@]}"
+}
+
 prompt_step() {
     local step="$1"
     local description="$2"
@@ -90,7 +145,7 @@ prompt_step() {
 
     read -r -p "Run ${step} (${description})? [y/N] " answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
-        run_step "$step"
+        run_step_spec "$step"
     else
         echo "Skipping ${step}."
     fi
@@ -130,7 +185,7 @@ select_steps_with_whiptail() {
 
     echo "Running selected setup steps: ${selected_steps[*]}"
     for step in "${selected_steps[@]}"; do
-        run_step "$step"
+        run_step_spec "$step"
     done
 }
 
@@ -167,17 +222,17 @@ if [[ $# -eq 0 || "$1" == "select" ]]; then
     fi
 elif [[ "$1" == "all" || "$1" == "full" ]]; then
     echo "Running all setup steps."
-    run_step "proxy" "auto"
-    run_step "system"
-    run_step "applications" "all"
-    run_step "shell"
-    run_step "appearance"
-    run_step "tools"
-    run_step "python"
-    run_step "editor"
-    run_step "dev-auth" "git" "ssh"
-    run_step "config" "all"
-    run_step "verify"
+    run_step_spec "proxy:auto"
+    run_step_spec "system"
+    run_step_spec "applications:all"
+    run_step_spec "shell"
+    run_step_spec "appearance"
+    run_step_spec "tools"
+    run_step_spec "python"
+    run_step_spec "editor"
+    run_step_spec "dev-auth:git,ssh"
+    run_step_spec "config:all"
+    run_step_spec "verify"
 elif [[ "$1" == "run" ]]; then
     shift
     if [[ $# -eq 0 ]]; then
@@ -188,12 +243,12 @@ elif [[ "$1" == "run" ]]; then
 
     echo "Running selected setup steps: $*"
     for step in "$@"; do
-        run_step "$step"
+        run_step_spec "$step"
     done
 else
     echo "Running selected setup steps: $*"
     for step in "$@"; do
-        run_step "$step"
+        run_step_spec "$step"
     done
 fi
 

@@ -102,8 +102,7 @@ restore_latest_backup() {
     local title="$2"
     local backup_path
 
-    backup_path="$(select_backup_for_target "$target" "$title")"
-    if [[ $? -ne 0 ]]; then
+    if ! backup_path="$(select_backup_for_target "$target" "$title")"; then
         echo "Restore cancelled for $target"
         return
     fi

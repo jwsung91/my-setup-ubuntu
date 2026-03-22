@@ -45,12 +45,28 @@ check_optional() {
     fi
 }
 
+check_required_local_bin_path() {
+    local managed_zshrc="$HOME/.zshrc.my-setup-ubuntu"
+    local user_zshrc="$HOME/.zshrc"
+    local path_line='export PATH="$HOME/.local/bin:$PATH"'
+
+    if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] \
+        || { [[ -f "$managed_zshrc" ]] && grep -Fq "$path_line" "$managed_zshrc"; } \
+        || { [[ -f "$user_zshrc" ]] && grep -Fq "$path_line" "$user_zshrc"; }; then
+        echo "[OK][required] ~/.local/bin configured for PATH"
+        REQUIRED_OK=$((REQUIRED_OK + 1))
+    else
+        echo "[WARN][required] ~/.local/bin configured for PATH"
+        REQUIRED_WARN=$((REQUIRED_WARN + 1))
+    fi
+}
+
 echo "--- Verifying installed tooling ---"
 check_required "git available" git --version
 check_required "zsh available" zsh --version
 check_required "vim available" vim --version
 check_required "ssh available" ssh -V
-check_required_shell "~/.local/bin is on PATH" 'case ":$PATH:" in *":$HOME/.local/bin:"*) exit 0 ;; *) exit 1 ;; esac'
+check_required_local_bin_path
 
 check_optional "gpg available" gpg --version
 check_optional "gpg-agent configuration valid" gpg-agent --gpgconf-test

@@ -11,10 +11,10 @@ RUN_GPG=0
 usage() {
     cat <<'EOF'
 Usage:
-  ./scripts/07-dev-auth.sh              Choose auth steps interactively
-  ./scripts/07-dev-auth.sh all          Run git, ssh, and gpg setup
-  ./scripts/07-dev-auth.sh git ssh      Run only git and ssh setup
-  ./scripts/07-dev-auth.sh gpg          Run only gpg setup
+  ./scripts/dev-auth.sh              Choose auth steps interactively
+  ./scripts/dev-auth.sh all          Run git, ssh, and gpg setup
+  ./scripts/dev-auth.sh git ssh      Run only git and ssh setup
+  ./scripts/dev-auth.sh gpg          Run only gpg setup
 EOF
 }
 

@@ -9,16 +9,16 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 ├── setup.sh                # Main entry point for interactive or selective setup
 ├── docs/                   # Extra reference docs
 ├── scripts/                # Step-by-step setup scripts
-│   ├── 01-system.sh        # System update and required package installation
-│   ├── 02-applications.sh  # Selective VS Code and Chrome installation
-│   ├── 03-shell.sh         # Zsh, Oh My Zsh, plugin, and theme installation
-│   ├── 04-appearance.sh    # D2Coding font and colorls installation
-│   ├── 05-editor.sh        # Vim and plugin bootstrap
-│   ├── 06-config.sh        # Managed dotfile content update and config merge
-│   ├── 07-dev-auth.sh      # Git, SSH, and GPG bootstrap
-│   ├── 08-verify.sh        # Tooling verification
-│   ├── 09-tools.sh         # Developer CLI tools
-│   └── 10-restore.sh       # Restore latest config backups
+│   ├── applications.sh     # Selective VS Code and Chrome installation
+│   ├── appearance.sh       # D2Coding font and colorls installation
+│   ├── config.sh           # Managed dotfile content update and config merge
+│   ├── dev-auth.sh         # Git, SSH, and GPG bootstrap
+│   ├── editor.sh           # Vim and plugin bootstrap
+│   ├── restore.sh          # Restore latest config backups
+│   ├── shell.sh            # Zsh, Oh My Zsh, plugin, and theme installation
+│   ├── system.sh           # System update and required package installation
+│   ├── tools.sh            # Developer CLI tools
+│   └── verify.sh           # Tooling verification
 └── dotfiles/               # Managed configuration file templates
     ├── zsh/                # Zsh configuration such as .zshrc
     ├── git/                # Git configuration such as .gitconfig
@@ -63,10 +63,10 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 ./setup.sh run system applications shell appearance tools editor dev-auth config verify
 
 # Run only the applications step and choose interactively
-./scripts/02-applications.sh
+./scripts/applications.sh
 
 # Install only VS Code
-./scripts/02-applications.sh vscode
+./scripts/applications.sh vscode
 ```
 
 > Note: `sudo` privileges are required during execution. Each script uses `set -euo pipefail` and exits early on unsupported Ubuntu versions or architectures.

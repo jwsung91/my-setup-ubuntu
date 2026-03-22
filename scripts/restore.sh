@@ -17,10 +17,10 @@ VIM_MANAGED_TARGET="$HOME/.vimrc.my-setup-ubuntu"
 usage() {
     cat <<'EOF'
 Usage:
-  ./scripts/10-restore.sh              Choose restore targets interactively
-  ./scripts/10-restore.sh all          Restore zsh, git, and vim backups
-  ./scripts/10-restore.sh zsh git      Restore only zsh and git backups
-  ./scripts/10-restore.sh vim          Restore only vim backups
+  ./scripts/restore.sh              Choose restore targets interactively
+  ./scripts/restore.sh all          Restore zsh, git, and vim backups
+  ./scripts/restore.sh zsh git      Restore only zsh and git backups
+  ./scripts/restore.sh vim          Restore only vim backups
 EOF
 }
 

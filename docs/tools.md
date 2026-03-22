@@ -1,6 +1,6 @@
 # Developer CLI Tools
 
-This project can install a small set of developer-oriented terminal tools through [`scripts/09-tools.sh`](/home/rain/workspace/jwsung91/my-setup-ubuntu/scripts/09-tools.sh).
+This project can install a small set of developer-oriented terminal tools through [`scripts/tools.sh`](/home/rain/workspace/jwsung91/my-setup-ubuntu/scripts/tools.sh).
 
 ## Included Tools
 

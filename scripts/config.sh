@@ -35,10 +35,10 @@ fi
 usage() {
     cat <<'EOF'
 Usage:
-  ./scripts/06-config.sh              Choose config targets interactively
-  ./scripts/06-config.sh all          Apply zsh, git, and vim config
-  ./scripts/06-config.sh zsh git      Apply only zsh and git config
-  ./scripts/06-config.sh vim          Apply only vim config
+  ./scripts/config.sh              Choose config targets interactively
+  ./scripts/config.sh all          Apply zsh, git, and vim config
+  ./scripts/config.sh zsh git      Apply only zsh and git config
+  ./scripts/config.sh vim          Apply only vim config
 EOF
 }
 

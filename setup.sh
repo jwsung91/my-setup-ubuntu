@@ -36,34 +36,34 @@ run_step() {
 
     case "$step" in
         system)
-            ./scripts/01-system.sh
+            ./scripts/system.sh
             ;;
         applications)
-            ./scripts/02-applications.sh "$@"
+            ./scripts/applications.sh "$@"
             ;;
         shell)
-            ./scripts/03-shell.sh
+            ./scripts/shell.sh
             ;;
         appearance)
-            ./scripts/04-appearance.sh
+            ./scripts/appearance.sh
             ;;
         tools)
-            ./scripts/09-tools.sh "$@"
+            ./scripts/tools.sh "$@"
             ;;
         editor)
-            ./scripts/05-editor.sh
+            ./scripts/editor.sh
             ;;
         dev-auth)
-            ./scripts/07-dev-auth.sh "$@"
+            ./scripts/dev-auth.sh "$@"
             ;;
         config)
-            ./scripts/06-config.sh "$@"
+            ./scripts/config.sh "$@"
             ;;
         restore)
-            ./scripts/10-restore.sh "$@"
+            ./scripts/restore.sh "$@"
             ;;
         verify)
-            ./scripts/08-verify.sh
+            ./scripts/verify.sh
             ;;
         *)
             echo "Unknown step: $step"

@@ -12,9 +12,9 @@ RUN_XCLIP=0
 usage() {
     cat <<'EOF'
 Usage:
-  ./scripts/09-tools.sh                    Choose tools interactively
-  ./scripts/09-tools.sh all                Install all tools
-  ./scripts/09-tools.sh ripgrep fd jq      Install selected tools
+  ./scripts/tools.sh                    Choose tools interactively
+  ./scripts/tools.sh all                Install all tools
+  ./scripts/tools.sh ripgrep fd jq      Install selected tools
 EOF
 }
 

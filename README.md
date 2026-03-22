@@ -66,6 +66,13 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 # Run the full setup in order
 ./setup.sh full
 
+# Recommended sequence for a fresh machine
+./setup.sh run preflight
+sudo -v
+./setup.sh full
+source ~/.zshrc
+./setup.sh run verify
+
 # Run only selected steps
 ./setup.sh run preflight proxy system applications shell appearance tools python editor dev-auth config verify
 
@@ -117,6 +124,7 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 - If an existing config file must be changed, the script creates a timestamped backup before writing the updated file.
 - When `chsh` changes the default shell to `zsh`, the change applies on the next login.
 - The `dev-auth` step uses `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `NAME`, or `EMAIL` if they are already set in the environment.
+- After the `python` and `config` steps, run `source ~/.zshrc` or open a new terminal before re-running `verify` so `pyenv` is visible in the shell.
 
 ## Additional Configuration
 

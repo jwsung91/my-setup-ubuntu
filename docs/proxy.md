@@ -29,6 +29,11 @@ Or directly:
 ./scripts/proxy.sh use work
 ```
 
+When `./setup.sh full` runs, the `proxy` step only auto-selects a profile when:
+
+- `.proxy.env` is already active, or
+- exactly one `proxy/*.env` profile exists
+
 ## Behavior
 
 - The active profile is exposed as repository-local `.proxy.env`.

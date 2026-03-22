@@ -36,3 +36,9 @@ Apply the updated shell config with the `config` step, then restart the shell or
 ```bash
 source ~/.zshrc
 ```
+
+If you run `verify` immediately after setup without reloading the shell, `pyenv` may still appear missing in the current session. Reload the shell first, then run:
+
+```bash
+./setup.sh run verify
+```

@@ -19,6 +19,7 @@ Usage:
   ./setup.sh run python:3.12.11 config:all verify  Run steps with step-specific args
 
 Available steps:
+  preflight     Check prerequisites before making changes
   proxy         Activate a proxy profile for networked steps
   system        System update and required packages
   applications  VS Code and Chrome
@@ -41,6 +42,9 @@ run_step() {
     case "$step" in
         proxy)
             ./scripts/proxy.sh "$@"
+            ;;
+        preflight)
+            ./scripts/preflight.sh
             ;;
         system)
             ./scripts/system.sh
@@ -111,7 +115,7 @@ step_counts_as_setup() {
                     ;;
             esac
             ;;
-        verify)
+        verify|preflight)
             return 1
             ;;
         *)
@@ -159,7 +163,8 @@ select_steps_with_whiptail() {
         whiptail \
             --title "Ubuntu Bootstrap" \
             --checklist "Select the steps to run" \
-            20 90 11 \
+            20 90 12 \
+            "preflight" "Check prerequisites before changes" OFF \
             "proxy" "Activate a proxy profile" OFF \
             "system" "System update and required packages" OFF \
             "applications" "VS Code and Chrome" OFF \
@@ -207,6 +212,7 @@ if [[ $# -eq 0 || "$1" == "select" ]]; then
             exit 0
         fi
     else
+        prompt_step "preflight" "check prerequisites before changes"
         prompt_step "proxy" "activate a proxy profile"
         prompt_step "system" "system update and required packages"
         prompt_step "applications" "VS Code and Chrome"
@@ -222,6 +228,7 @@ if [[ $# -eq 0 || "$1" == "select" ]]; then
     fi
 elif [[ "$1" == "all" || "$1" == "full" ]]; then
     echo "Running all setup steps."
+    run_step_spec "preflight"
     run_step_spec "proxy:auto"
     run_step_spec "system"
     run_step_spec "applications:all"

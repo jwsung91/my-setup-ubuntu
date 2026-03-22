@@ -15,6 +15,7 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 │   ├── config.sh           # Managed dotfile content update and config merge
 │   ├── dev-auth.sh         # Git, SSH, and GPG bootstrap
 │   ├── editor.sh           # Vim and plugin bootstrap
+│   ├── preflight.sh        # Prerequisite checks before setup
 │   ├── python.sh           # Python, pyenv, and pipx bootstrap
 │   ├── proxy.sh            # Proxy profile activation
 │   ├── restore.sh          # Restore latest config backups
@@ -30,18 +31,19 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 
 ## Included Features
 
-1. **Proxy profiles**: activates one of several proxy profiles before network-heavy steps
-2. **System packages**: runs `apt update && apt upgrade` and installs required packages such as `curl`, `wget`, `git`, and `build-essential`
-3. **Applications**: lets you choose VS Code and Google Chrome individually
-4. **Terminal setup**: installs Zsh, Oh My Zsh, the `zsh-autosuggestions` and `zsh-syntax-highlighting` plugins, and the `powerlevel10k` theme
-5. **CLI appearance**: installs the D2Coding font and `colorls`
-6. **Developer tools**: installs common terminal tools such as `ripgrep`, `fd`, `fzf`, `bat`, and `jq`
-7. **Python bootstrap**: installs `python3`, `pipx`, `pyenv`, and optional pyenv-managed Python versions
-8. **Editor bootstrap**: installs Vim, bootstraps Vundle, and runs a non-interactive Vim plugin sync
-9. **Dotfile management**: backs up existing config files, installs managed config fragments, and adds include or source blocks without duplication
-10. **Developer authentication**: prepares baseline Git identity settings and optional SSH or GPG bootstrap
-11. **Verification**: checks required and optional tooling separately, prints a summary, and fails if required tools are missing
-12. **Restore**: restores the latest backup for managed config targets when you need to roll back
+1. **Preflight checks**: validates prerequisites before setup starts changing the system
+2. **Proxy profiles**: activates one of several proxy profiles before network-heavy steps
+3. **System packages**: runs `apt update && apt upgrade` and installs required packages such as `curl`, `wget`, `git`, and `build-essential`
+4. **Applications**: lets you choose VS Code and Google Chrome individually
+5. **Terminal setup**: installs Zsh, Oh My Zsh, the `zsh-autosuggestions` and `zsh-syntax-highlighting` plugins, and the `powerlevel10k` theme
+6. **CLI appearance**: installs the D2Coding font and `colorls`
+7. **Developer tools**: installs common terminal tools such as `ripgrep`, `fd`, `fzf`, `bat`, and `jq`
+8. **Python bootstrap**: installs `python3`, `pipx`, `pyenv`, and optional pyenv-managed Python versions
+9. **Editor bootstrap**: installs Vim, bootstraps Vundle, and runs a non-interactive Vim plugin sync
+10. **Dotfile management**: backs up existing config files, installs managed config fragments, and adds include or source blocks without duplication
+11. **Developer authentication**: prepares baseline Git identity settings and optional SSH or GPG bootstrap
+12. **Verification**: checks required and optional tooling separately, prints a summary, and fails if required tools are missing
+13. **Restore**: restores the latest backup for managed config targets when you need to roll back
 
 ## Supported Environment
 
@@ -65,10 +67,13 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 ./setup.sh full
 
 # Run only selected steps
-./setup.sh run proxy system applications shell appearance tools python editor dev-auth config verify
+./setup.sh run preflight proxy system applications shell appearance tools python editor dev-auth config verify
 
 # Pass step-specific arguments with step:arg1,arg2
 ./setup.sh run proxy:use,work applications:all python:3.12.11 config:all verify
+
+# Check whether the machine is ready before setup
+./scripts/preflight.sh
 
 # Choose and activate a proxy profile
 ./scripts/proxy.sh
@@ -96,8 +101,9 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 - `./setup.sh run step:arg1,arg2 ...` passes arguments through to individual steps.
 - `setup.sh` supports both interactive selection and explicit step arguments.
 - Several steps are written to be re-runnable and will reuse already installed components when possible.
-- The default full setup order is `proxy -> system -> applications -> shell -> appearance -> tools -> python -> editor -> dev-auth -> config -> verify`.
+- The default full setup order is `preflight -> proxy -> system -> applications -> shell -> appearance -> tools -> python -> editor -> dev-auth -> config -> verify`.
 - The default full setup runs `dev-auth` with `git` and `ssh`; GPG is optional and can be selected separately.
+- The `preflight` step validates prerequisites such as Ubuntu version, architecture, required commands, and proxy/profile readiness without modifying the system.
 - The `python` step installs `pyenv`, `pipx`, and Python build dependencies. If you pass a version, it also installs and sets that Python version globally.
 - The `proxy` step activates one profile from `proxy/*.env` by linking it to `.proxy.env`.
 - When `full` is used, the `proxy` step auto-selects only when there is already an active `.proxy.env` file or exactly one available profile.

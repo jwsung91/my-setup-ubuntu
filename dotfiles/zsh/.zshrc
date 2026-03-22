@@ -4,6 +4,10 @@ ZSH_THEME="robbyrussell"
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
+if [ -n "${TTY:-}" ] || [ -t 0 ]; then
+    export GPG_TTY="$(tty)"
+fi
+
 # Gemini API key example
 # export GEMINI_API_KEY="put_your_key_here"
 

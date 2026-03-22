@@ -10,11 +10,12 @@ usage() {
 Usage:
   ./setup.sh                Start interactive step selection
   ./setup.sh all            Run every setup step
-  ./setup.sh system shell   Run only selected steps
+  ./setup.sh system applications shell   Run only selected steps
 
 Available steps:
-  system       System update, VS Code, and Chrome
-  shell        Zsh, Oh My Zsh, and plugins
+  system        System update and required packages
+  applications  VS Code and Chrome
+  shell         Zsh, Oh My Zsh, plugins, and theme
   appearance   D2Coding font and colorls
   stow         Dotfile symlinks via GNU Stow
 EOF
@@ -26,6 +27,9 @@ run_step() {
     case "$step" in
         system)
             ./scripts/01-system.sh
+            ;;
+        applications)
+            ./scripts/05-applications.sh
             ;;
         shell)
             ./scripts/02-shell.sh
@@ -67,13 +71,15 @@ chmod +x scripts/*.sh
 
 if [[ $# -eq 0 ]]; then
     echo "No steps were passed. Starting interactive selection."
-    prompt_step "system" "system update, VS Code, and Chrome"
-    prompt_step "shell" "Zsh, Oh My Zsh, and plugins"
+    prompt_step "system" "system update and required packages"
+    prompt_step "applications" "VS Code and Chrome"
+    prompt_step "shell" "Zsh, Oh My Zsh, plugins, and theme"
     prompt_step "appearance" "D2Coding font and colorls"
     prompt_step "stow" "dotfile symlinks"
 elif [[ "$1" == "all" ]]; then
     echo "Running all setup steps."
     run_step "system"
+    run_step "applications"
     run_step "shell"
     run_step "appearance"
     run_step "stow"

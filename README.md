@@ -8,10 +8,11 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 .
 ├── setup.sh                # Main entry point for interactive or selective setup
 ├── scripts/                # Step-by-step setup scripts
-│   ├── 01-system.sh        # System update, VS Code, and Chrome installation
+│   ├── 01-system.sh        # System update and required package installation
 │   ├── 02-shell.sh         # Zsh, Oh My Zsh, plugin, and theme installation
 │   ├── 03-appearance.sh    # D2Coding font and colorls installation
-│   └── 04-stow.sh          # Dotfile symlink setup via GNU Stow
+│   ├── 04-stow.sh          # Dotfile symlink setup via GNU Stow
+│   └── 05-applications.sh  # VS Code and Chrome installation
 └── dotfiles/               # Managed configuration files for Stow
     ├── zsh/                # Zsh configuration such as .zshrc
     ├── git/                # Git configuration such as .gitconfig
@@ -21,7 +22,7 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 ## Included Features
 
 1. **System packages**: runs `apt update && apt upgrade` and installs required packages such as `curl`, `wget`, `git`, `stow`, and `build-essential`
-2. **Developer tools**: registers the official VS Code repository and installs Google Chrome
+2. **Applications**: registers the official VS Code repository and installs Google Chrome
 3. **Terminal setup**: installs Zsh, Oh My Zsh, the `zsh-autosuggestions` and `zsh-syntax-highlighting` plugins, and the `powerlevel10k` theme
 4. **CLI appearance**: installs the D2Coding font and `colorls`
 5. **Dotfile management**: links files from `dotfiles/` into the home directory with GNU Stow
@@ -45,7 +46,7 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 ./setup.sh all
 
 # Run only selected steps
-./setup.sh system shell
+./setup.sh system applications shell
 ```
 
 > Note: `sudo` privileges are required during execution. Each script uses `set -euo pipefail` and exits early on unsupported Ubuntu versions or architectures.

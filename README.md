@@ -12,7 +12,7 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 │   ├── 02-shell.sh         # Zsh, Oh My Zsh, plugin, and theme installation
 │   ├── 03-appearance.sh    # D2Coding font and colorls installation
 │   ├── 04-stow.sh          # Dotfile symlink setup via GNU Stow
-│   └── 05-applications.sh  # VS Code and Chrome installation
+│   └── 05-applications.sh  # Selective VS Code and Chrome installation
 └── dotfiles/               # Managed configuration files for Stow
     ├── zsh/                # Zsh configuration such as .zshrc
     ├── git/                # Git configuration such as .gitconfig
@@ -22,7 +22,7 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 ## Included Features
 
 1. **System packages**: runs `apt update && apt upgrade` and installs required packages such as `curl`, `wget`, `git`, `stow`, and `build-essential`
-2. **Applications**: registers the official VS Code repository and installs Google Chrome
+2. **Applications**: lets you choose VS Code and Google Chrome individually
 3. **Terminal setup**: installs Zsh, Oh My Zsh, the `zsh-autosuggestions` and `zsh-syntax-highlighting` plugins, and the `powerlevel10k` theme
 4. **CLI appearance**: installs the D2Coding font and `colorls`
 5. **Dotfile management**: links files from `dotfiles/` into the home directory with GNU Stow
@@ -47,6 +47,12 @@ Run one of the following commands from inside the `my-setup-ubuntu` repository:
 
 # Run only selected steps
 ./setup.sh system applications shell
+
+# Run only the applications step and choose interactively
+./scripts/05-applications.sh
+
+# Install only VS Code
+./scripts/05-applications.sh vscode
 ```
 
 > Note: `sudo` privileges are required during execution. Each script uses `set -euo pipefail` and exits early on unsupported Ubuntu versions or architectures.

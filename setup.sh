@@ -29,7 +29,7 @@ run_step() {
             ./scripts/01-system.sh
             ;;
         applications)
-            ./scripts/05-applications.sh
+            ./scripts/05-applications.sh "$@"
             ;;
         shell)
             ./scripts/02-shell.sh
@@ -79,7 +79,7 @@ if [[ $# -eq 0 ]]; then
 elif [[ "$1" == "all" ]]; then
     echo "Running all setup steps."
     run_step "system"
-    run_step "applications"
+    run_step "applications" "all"
     run_step "shell"
     run_step "appearance"
     run_step "stow"

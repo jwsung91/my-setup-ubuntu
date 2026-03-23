@@ -5,6 +5,7 @@ VIM_BUNDLE_DIR="$HOME/.vim/bundle"
 TEMP_DIR="$(mktemp -d)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+source "$SCRIPT_DIR/lib/ui.sh"
 source "$SCRIPT_DIR/lib/proxy.sh"
 load_proxy_settings
 
@@ -15,7 +16,7 @@ cleanup() {
 trap cleanup EXIT
 
 install_vim() {
-    echo "--- Installing Vim ---"
+    log_section "Installing Vim"
     apt_with_proxy install -y vim
 }
 
@@ -26,12 +27,12 @@ install_plugin() {
     if [[ ! -d "$plugin_dir" ]]; then
         git clone "$repo_url" "$plugin_dir"
     else
-        echo "Plugin already installed: $plugin_dir"
+        log_info "Plugin already installed: $plugin_dir"
     fi
 }
 
 install_vundle() {
-    echo "--- Installing Vim plugin manager ---"
+    log_section "Installing Vim plugin manager"
     mkdir -p "$VIM_BUNDLE_DIR"
     install_plugin "https://github.com/VundleVim/Vundle.vim.git" "$VIM_BUNDLE_DIR/Vundle.vim"
 }
@@ -40,7 +41,7 @@ sync_vim_plugins() {
     local bootstrap_vimrc
     bootstrap_vimrc="$TEMP_DIR/vundle-bootstrap.vim"
 
-    echo "--- Syncing Vim plugins with Vundle ---"
+    log_section "Syncing Vim plugins with Vundle"
     cat > "$bootstrap_vimrc" <<'EOF'
 set nocompatible
 set rtp+=~/.vim/bundle/Vundle.vim

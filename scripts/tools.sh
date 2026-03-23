@@ -46,7 +46,7 @@ select_tools_with_whiptail() {
     read -r -a selected_items <<< "$selection"
 
     if [[ ${#selected_items[@]} -eq 0 ]]; then
-        echo "No tools selected. Skipping."
+        log_warn "No tools selected. Skipping."
         return 1
     fi
 
@@ -114,7 +114,7 @@ else
                 RUN_XCLIP=1
                 ;;
             *)
-                echo "Unknown tool target: $item"
+                log_error "Unknown tool target: $item"
                 usage
                 exit 1
                 ;;
@@ -123,7 +123,7 @@ else
 fi
 
 if [[ "$RUN_RIPGREP" -eq 0 && "$RUN_FD" -eq 0 && "$RUN_FZF" -eq 0 && "$RUN_BAT" -eq 0 && "$RUN_JQ" -eq 0 && "$RUN_TMUX" -eq 0 && "$RUN_XCLIP" -eq 0 ]]; then
-    echo "No tools selected. Skipping."
+    log_warn "No tools selected. Skipping."
     exit 0
 fi
 
@@ -137,18 +137,18 @@ PACKAGES=()
 [[ "$RUN_TMUX" -eq 1 ]] && PACKAGES+=("tmux")
 [[ "$RUN_XCLIP" -eq 1 ]] && PACKAGES+=("xclip")
 
-echo "--- Installing developer CLI tools ---"
+log_section "Installing developer CLI tools"
 apt_with_proxy update
 apt_with_proxy install -y "${PACKAGES[@]}"
 
 if [[ "$RUN_BAT" -eq 1 ]] && command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
     mkdir -p "$HOME/.local/bin"
     ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
-    echo "Created ~/.local/bin/bat -> batcat"
+    log_ok "Created ~/.local/bin/bat -> batcat"
 fi
 
 if [[ "$RUN_FD" -eq 1 ]] && command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     mkdir -p "$HOME/.local/bin"
     ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
-    echo "Created ~/.local/bin/fd -> fdfind"
+    log_ok "Created ~/.local/bin/fd -> fdfind"
 fi

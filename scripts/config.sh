@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "--- Applying managed dotfile content ---"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
 BACKUP_PATH=""
@@ -10,6 +9,8 @@ RUN_GIT=0
 RUN_VIM=0
 
 source "$SCRIPT_DIR/lib/ui.sh"
+
+log_section "Applying managed dotfile content"
 
 ZSH_SOURCE="$DOTFILES_DIR/zsh/.zshrc"
 ZSH_MANAGED_TARGET="$HOME/.zshrc.my-setup-ubuntu"
@@ -30,7 +31,7 @@ VIM_MARKER_START="\" >>> my-setup-ubuntu vimrc >>>"
 VIM_MARKER_END="\" <<< my-setup-ubuntu vimrc <<<"
 
 if [[ ! -d "$DOTFILES_DIR" ]]; then
-    echo "dotfiles directory not found: $DOTFILES_DIR"
+    log_error "dotfiles directory not found: $DOTFILES_DIR"
     exit 1
 fi
 
@@ -63,7 +64,7 @@ select_config_with_whiptail() {
     read -r -a selected_items <<< "$selection"
 
     if [[ ${#selected_items[@]} -eq 0 ]]; then
-        echo "No config targets selected. Skipping."
+        log_warn "No config targets selected. Skipping."
         return 1
     fi
 
@@ -83,7 +84,7 @@ backup_file() {
     backup_path="${file_path}.bak.$(date +%Y%m%d%H%M%S)"
     mv "$file_path" "$backup_path"
     BACKUP_PATH="$backup_path"
-    echo "Backed up ${file_path} to ${backup_path}"
+    log_info "Backed up ${file_path} to ${backup_path}"
 }
 
 install_managed_file() {
@@ -91,12 +92,12 @@ install_managed_file() {
     local target_path="$2"
 
     if [[ ! -f "$source_path" ]]; then
-        echo "Managed file source not found: $source_path"
+        log_error "Managed file source not found: $source_path"
         exit 1
     fi
 
     if [[ -e "$target_path" && ! -L "$target_path" ]] && cmp -s "$source_path" "$target_path"; then
-        echo "Managed file already up to date: $target_path"
+        log_info "Managed file already up to date: $target_path"
         return
     fi
 
@@ -105,7 +106,7 @@ install_managed_file() {
     fi
 
     install -m 0644 "$source_path" "$target_path"
-    echo "Installed managed file: $target_path"
+    log_ok "Installed managed file: $target_path"
 }
 
 ensure_block_in_file() {
@@ -132,12 +133,12 @@ EOF
 
     if [[ -f "$user_target" ]]; then
         if grep -Fq "$marker_start" "$user_target"; then
-            echo "Managed block already exists in $user_target"
+            log_info "Managed block already exists in $user_target"
             return
         fi
 
         if grep -Fq "$duplicate_probe" "$user_target"; then
-            echo "Managed include/source line already exists in $user_target"
+            log_info "Managed include/source line already exists in $user_target"
             return
         fi
 
@@ -145,12 +146,12 @@ EOF
         backup_path="$BACKUP_PATH"
         cp "$backup_path" "$user_target"
         printf "\n%s\n" "$block" >> "$user_target"
-        echo "Appended managed block to $user_target"
+        log_ok "Appended managed block to $user_target"
         return
     fi
 
     printf "%s\n" "$block" > "$user_target"
-    echo "Created $user_target with managed block"
+    log_ok "Created $user_target with managed block"
 }
 
 apply_zsh_config() {
@@ -219,7 +220,7 @@ else
                 RUN_VIM=1
                 ;;
             *)
-                echo "Unknown config target: $item"
+                log_error "Unknown config target: $item"
                 usage
                 exit 1
                 ;;
@@ -228,7 +229,7 @@ else
 fi
 
 if [[ "$RUN_ZSH" -eq 0 && "$RUN_GIT" -eq 0 && "$RUN_VIM" -eq 0 ]]; then
-    echo "No config targets selected. Skipping."
+    log_warn "No config targets selected. Skipping."
     exit 0
 fi
 

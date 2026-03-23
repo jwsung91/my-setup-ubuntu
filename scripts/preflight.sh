@@ -27,10 +27,10 @@ check_required_command() {
     local command_name="$2"
 
     if command -v "$command_name" >/dev/null 2>&1; then
-        echo "[OK][required] $label"
+        log_status "OK" "required" "$label"
         REQUIRED_OK=$((REQUIRED_OK + 1))
     else
-        echo "[WARN][required] $label"
+        log_status "WARN" "required" "$label"
         REQUIRED_WARN=$((REQUIRED_WARN + 1))
     fi
 }
@@ -40,10 +40,10 @@ check_required_test() {
     shift
 
     if "$@"; then
-        echo "[OK][required] $label"
+        log_status "OK" "required" "$label"
         REQUIRED_OK=$((REQUIRED_OK + 1))
     else
-        echo "[WARN][required] $label"
+        log_status "WARN" "required" "$label"
         REQUIRED_WARN=$((REQUIRED_WARN + 1))
     fi
 }
@@ -53,10 +53,10 @@ check_optional_test() {
     shift
 
     if "$@"; then
-        echo "[OK][optional] $label"
+        log_status "OK" "optional" "$label"
         OPTIONAL_OK=$((OPTIONAL_OK + 1))
     else
-        echo "[WARN][optional] $label"
+        log_status "WARN" "optional" "$label"
         OPTIONAL_WARN=$((OPTIONAL_WARN + 1))
     fi
 }
@@ -67,14 +67,14 @@ check_shell() {
     local level="$3"
 
     if bash -lc "$command_string" >/dev/null 2>&1; then
-        echo "[OK][$level] $label"
+        log_status "OK" "$level" "$label"
         if [[ "$level" == "required" ]]; then
             REQUIRED_OK=$((REQUIRED_OK + 1))
         else
             OPTIONAL_OK=$((OPTIONAL_OK + 1))
         fi
     else
-        echo "[WARN][$level] $label"
+        log_status "WARN" "$level" "$label"
         if [[ "$level" == "required" ]]; then
             REQUIRED_WARN=$((REQUIRED_WARN + 1))
         else
@@ -112,54 +112,56 @@ has_active_proxy_file() {
 print_recommendations() {
     local printed=0
 
-    echo "--- Recommended next actions ---"
+    log_section "Recommended next actions"
 
     if [[ "$WARN_SUPPORTED_ARCH" -eq 1 ]]; then
-        echo "- Use an amd64 Ubuntu machine. The current setup does not support this architecture."
+        log_warn "Use an amd64 Ubuntu machine. The current setup does not support this architecture."
         printed=1
     fi
 
     if [[ "$WARN_SUPPORTED_UBUNTU" -eq 1 ]]; then
-        echo "- Use Ubuntu Desktop 22.04 or 24.04 before running the full setup."
+        log_warn "Use Ubuntu Desktop 22.04 or 24.04 before running the full setup."
         printed=1
     fi
 
     if [[ "$WARN_SCRIPTS_DIR" -eq 1 || "$WARN_DOTFILES_DIR" -eq 1 ]]; then
-        echo "- Run the setup from the repository root and make sure the checkout is complete."
+        log_warn "Run the setup from the repository root and make sure the checkout is complete."
         printed=1
     fi
 
     if [[ "$WARN_SUDO_AUTH" -eq 1 ]]; then
-        echo "- Run \`sudo -v\` once before \`./setup.sh full\` to avoid repeated password prompts."
+        log_warn "Run \`sudo -v\` once before \`./setup.sh full\` to avoid repeated password prompts."
         printed=1
     fi
 
     if [[ "$WARN_PROXY_PROFILES" -eq 1 ]]; then
-        echo "- If your network needs a proxy, create a profile under \`proxy/*.env\` from \`.proxy.env.example\`."
+        log_warn "If your network needs a proxy, create a profile under \`proxy/*.env\` from \`.proxy.env.example\`."
         printed=1
     fi
 
     if [[ "$WARN_ACTIVE_PROXY" -eq 1 && "$WARN_PROXY_PROFILES" -eq 0 ]]; then
-        echo "- Activate a proxy before networked steps with \`./scripts/proxy.sh\` or \`./setup.sh run proxy\`."
+        log_warn "Activate a proxy before networked steps with \`./scripts/proxy.sh\` or \`./setup.sh run proxy\`."
         printed=1
     fi
 
     if [[ "$WARN_SINGLE_PROXY_PROFILE" -eq 1 && "$WARN_PROXY_PROFILES" -eq 0 && "$WARN_ACTIVE_PROXY" -eq 1 ]]; then
-        echo "- If you want \`full\` to auto-pick a proxy, keep exactly one profile or pre-activate one."
+        log_warn "If you want \`full\` to auto-pick a proxy, keep exactly one profile or pre-activate one."
         printed=1
     fi
 
     if [[ "$WARN_HOME_WRITABLE" -eq 1 ]]; then
-        echo "- Ensure your home directory is writable before applying config or restore steps."
+        log_warn "Ensure your home directory is writable before applying config or restore steps."
         printed=1
     fi
 
     if [[ "$printed" -eq 0 ]]; then
-        echo "- No blocking issues detected. You can continue with \`./setup.sh full\`."
+        log_ok "No blocking issues detected. You can continue with \`./setup.sh full\`."
     fi
 }
 
-echo "--- Running preflight checks ---"
+source "$SCRIPT_DIR/lib/ui.sh"
+
+log_section "Running preflight checks"
 check_required_command "sudo available" sudo
 check_required_command "git available" git
 check_required_command "curl available" curl
@@ -193,11 +195,11 @@ check_optional_test "zsh managed config exists" test -f "$PROJECT_ROOT/dotfiles/
 check_optional_test "git managed config exists" test -f "$PROJECT_ROOT/dotfiles/git/.gitconfig"
 check_optional_test "vim managed config exists" test -f "$PROJECT_ROOT/dotfiles/vim/.vimrc"
 
-echo "--- Preflight summary ---"
-echo "Required passed: $REQUIRED_OK"
-echo "Required warnings: $REQUIRED_WARN"
-echo "Optional passed: $OPTIONAL_OK"
-echo "Optional warnings: $OPTIONAL_WARN"
+log_section "Preflight summary"
+log_info "Required passed: $REQUIRED_OK"
+log_info "Required warnings: $REQUIRED_WARN"
+log_info "Optional passed: $OPTIONAL_OK"
+log_info "Optional warnings: $OPTIONAL_WARN"
 print_recommendations
 
 if [[ "$REQUIRED_WARN" -gt 0 ]]; then

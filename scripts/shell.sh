@@ -3,11 +3,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+source "$SCRIPT_DIR/lib/ui.sh"
 source "$SCRIPT_DIR/lib/proxy.sh"
 load_proxy_settings
 
 install_zsh() {
-    echo "--- Installing Zsh and setting it as the default shell ---"
+    log_section "Installing Zsh and setting it as the default shell"
     apt_with_proxy install -y zsh
 
     local zsh_path
@@ -17,48 +18,48 @@ install_zsh() {
 
     if [[ "$current_shell" != "$zsh_path" ]]; then
         chsh -s "$zsh_path"
-        echo "Default shell changed to zsh. It will apply on the next login."
+        log_ok "Default shell changed to zsh. It will apply on the next login."
     else
-        echo "Default shell is already set to zsh."
+        log_info "Default shell is already set to zsh."
     fi
 }
 
 install_oh_my_zsh() {
-    echo "--- Installing Oh My Zsh ---"
+    log_section "Installing Oh My Zsh"
     if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     else
-        echo "Oh My Zsh is already installed."
+        log_info "Oh My Zsh is already installed."
     fi
 }
 
 install_plugins() {
-    echo "--- Installing Zsh plugins ---"
+    log_section "Installing Zsh plugins"
     local zsh_custom
     zsh_custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
     if [[ ! -d "${zsh_custom}/plugins/zsh-autosuggestions" ]]; then
         git clone https://github.com/zsh-users/zsh-autosuggestions "${zsh_custom}/plugins/zsh-autosuggestions"
     else
-        echo "zsh-autosuggestions is already installed."
+        log_info "zsh-autosuggestions is already installed."
     fi
 
     if [[ ! -d "${zsh_custom}/plugins/zsh-syntax-highlighting" ]]; then
         git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${zsh_custom}/plugins/zsh-syntax-highlighting"
     else
-        echo "zsh-syntax-highlighting is already installed."
+        log_info "zsh-syntax-highlighting is already installed."
     fi
 }
 
 install_theme() {
-    echo "--- Installing Zsh theme ---"
+    log_section "Installing Zsh theme"
     local zsh_custom
     zsh_custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
     if [[ ! -d "${zsh_custom}/themes/powerlevel10k" ]]; then
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${zsh_custom}/themes/powerlevel10k"
     else
-        echo "powerlevel10k is already installed."
+        log_info "powerlevel10k is already installed."
     fi
 }
 

@@ -1,20 +1,23 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REQUIRED_OK=0
 REQUIRED_WARN=0
 OPTIONAL_OK=0
 OPTIONAL_WARN=0
+
+source "$SCRIPT_DIR/lib/ui.sh"
 
 check_required_shell() {
     local label="$1"
     local command_string="$2"
 
     if bash -lc "$command_string" >/dev/null 2>&1; then
-        echo "[OK][required] $label"
+        log_status "OK" "required" "$label"
         REQUIRED_OK=$((REQUIRED_OK + 1))
     else
-        echo "[WARN][required] $label"
+        log_status "WARN" "required" "$label"
         REQUIRED_WARN=$((REQUIRED_WARN + 1))
     fi
 }
@@ -24,10 +27,10 @@ check_required() {
     shift
 
     if "$@" >/dev/null 2>&1; then
-        echo "[OK][required] $label"
+        log_status "OK" "required" "$label"
         REQUIRED_OK=$((REQUIRED_OK + 1))
     else
-        echo "[WARN][required] $label"
+        log_status "WARN" "required" "$label"
         REQUIRED_WARN=$((REQUIRED_WARN + 1))
     fi
 }
@@ -37,10 +40,10 @@ check_optional() {
     shift
 
     if "$@" >/dev/null 2>&1; then
-        echo "[OK][optional] $label"
+        log_status "OK" "optional" "$label"
         OPTIONAL_OK=$((OPTIONAL_OK + 1))
     else
-        echo "[WARN][optional] $label"
+        log_status "WARN" "optional" "$label"
         OPTIONAL_WARN=$((OPTIONAL_WARN + 1))
     fi
 }
@@ -53,15 +56,15 @@ check_required_local_bin_path() {
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] \
         || { [[ -f "$managed_zshrc" ]] && grep -Fq "$path_line" "$managed_zshrc"; } \
         || { [[ -f "$user_zshrc" ]] && grep -Fq "$path_line" "$user_zshrc"; }; then
-        echo "[OK][required] ~/.local/bin configured for PATH"
+        log_status "OK" "required" "~/.local/bin configured for PATH"
         REQUIRED_OK=$((REQUIRED_OK + 1))
     else
-        echo "[WARN][required] ~/.local/bin configured for PATH"
+        log_status "WARN" "required" "~/.local/bin configured for PATH"
         REQUIRED_WARN=$((REQUIRED_WARN + 1))
     fi
 }
 
-echo "--- Verifying installed tooling ---"
+log_section "Verifying installed tooling"
 check_required "git available" git --version
 check_required "zsh available" zsh --version
 check_required "vim available" vim --version
@@ -87,18 +90,18 @@ check_optional "git user.name configured" git config --global user.name
 check_optional "git user.email configured" git config --global user.email
 
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
-    echo "[OK][optional] SSH public key present: $HOME/.ssh/id_ed25519.pub"
+    log_status "OK" "optional" "SSH public key present: $HOME/.ssh/id_ed25519.pub"
     OPTIONAL_OK=$((OPTIONAL_OK + 1))
 else
-    echo "[WARN][optional] SSH public key missing: $HOME/.ssh/id_ed25519.pub"
+    log_status "WARN" "optional" "SSH public key missing: $HOME/.ssh/id_ed25519.pub"
     OPTIONAL_WARN=$((OPTIONAL_WARN + 1))
 fi
 
-echo "--- Verification summary ---"
-echo "Required passed: $REQUIRED_OK"
-echo "Required warnings: $REQUIRED_WARN"
-echo "Optional passed: $OPTIONAL_OK"
-echo "Optional warnings: $OPTIONAL_WARN"
+log_section "Verification summary"
+log_info "Required passed: $REQUIRED_OK"
+log_info "Required warnings: $REQUIRED_WARN"
+log_info "Optional passed: $OPTIONAL_OK"
+log_info "Optional warnings: $OPTIONAL_WARN"
 
 if [[ "$REQUIRED_WARN" -gt 0 ]]; then
     exit 1

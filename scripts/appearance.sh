@@ -5,6 +5,7 @@ FONT_DIR="$HOME/.local/share/fonts"
 TEMP_DIR="$(mktemp -d)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+source "$SCRIPT_DIR/lib/ui.sh"
 source "$SCRIPT_DIR/lib/proxy.sh"
 load_proxy_settings
 
@@ -14,7 +15,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-echo "--- Installing the D2Coding font ---"
+log_section "Installing the D2Coding font"
 mkdir -p "$FONT_DIR"
 apt_with_proxy install -y unzip ruby-full
 
@@ -25,12 +26,12 @@ if ! fc-list | grep -qi "D2Coding"; then
     cp D2Coding/*.ttf "$FONT_DIR/"
     fc-cache -f
 else
-    echo "D2Coding font is already installed."
+    log_info "D2Coding font is already installed."
 fi
 
-echo "--- Installing colorls (Ruby gem) ---"
+log_section "Installing colorls (Ruby gem)"
 if ! command -v colorls >/dev/null 2>&1; then
     gem_with_proxy install colorls
 else
-    echo "colorls is already installed."
+    log_info "colorls is already installed."
 fi

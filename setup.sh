@@ -80,7 +80,7 @@ run_step() {
             ./scripts/verify.sh
             ;;
         *)
-            echo "Unknown step: $step"
+            log_error "Unknown step: $step"
             usage
             exit 1
             ;;
@@ -151,7 +151,7 @@ prompt_step() {
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         run_step_spec "$step"
     else
-        echo "Skipping ${step}."
+        log_warn "Skipping ${step}."
     fi
 }
 
@@ -184,11 +184,11 @@ select_steps_with_whiptail() {
     read -r -a selected_steps <<< "$selection"
 
     if [[ ${#selected_steps[@]} -eq 0 ]]; then
-        echo "No steps selected. Exiting."
+        log_warn "No steps selected. Exiting."
         return 1
     fi
 
-    echo "Running selected setup steps: ${selected_steps[*]}"
+    log_info "Running selected setup steps: ${selected_steps[*]}"
     for step in "${selected_steps[@]}"; do
         run_step_spec "$step"
     done
@@ -201,14 +201,14 @@ fi
 
 configure_whiptail_colors
 
-echo "Making all scripts executable..."
+log_section "Preparing setup scripts"
 chmod +x scripts/*.sh
 
 if [[ $# -eq 0 || "$1" == "select" ]]; then
-    echo "No steps were passed. Starting interactive selection."
+    log_info "No steps were passed. Starting interactive selection."
     if command -v whiptail >/dev/null 2>&1; then
         if ! select_steps_with_whiptail; then
-            echo "Selection cancelled."
+            log_warn "Selection cancelled."
             exit 0
         fi
     else
@@ -227,7 +227,7 @@ if [[ $# -eq 0 || "$1" == "select" ]]; then
         prompt_step "verify" "tooling verification"
     fi
 elif [[ "$1" == "all" || "$1" == "full" ]]; then
-    echo "Running all setup steps."
+    log_info "Running all setup steps."
     run_step_spec "preflight"
     run_step_spec "proxy:auto"
     run_step_spec "system"
@@ -243,24 +243,23 @@ elif [[ "$1" == "all" || "$1" == "full" ]]; then
 elif [[ "$1" == "run" ]]; then
     shift
     if [[ $# -eq 0 ]]; then
-        echo "No steps were provided for run."
+        log_error "No steps were provided for run."
         usage
         exit 1
     fi
 
-    echo "Running selected setup steps: $*"
+    log_info "Running selected setup steps: $*"
     for step in "$@"; do
         run_step_spec "$step"
     done
 else
-    echo "Running selected setup steps: $*"
+    log_info "Running selected setup steps: $*"
     for step in "$@"; do
         run_step_spec "$step"
     done
 fi
 
 if [[ "$RAN_ANY_STEP" -eq 1 ]]; then
-    echo "=========================================="
-    echo "Setup complete. Restart your terminal."
-    echo "=========================================="
+    log_section "Setup complete"
+    log_ok "Restart your terminal."
 fi

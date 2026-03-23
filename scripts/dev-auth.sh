@@ -42,7 +42,7 @@ select_dev_auth_with_whiptail() {
     read -r -a selected_items <<< "$selection"
 
     if [[ ${#selected_items[@]} -eq 0 ]]; then
-        echo "No auth steps selected. Skipping."
+        log_warn "No auth steps selected. Skipping."
         return 1
     fi
 
@@ -87,7 +87,7 @@ else
                 RUN_GPG=1
                 ;;
             *)
-                echo "Unknown auth step: $item"
+                log_error "Unknown auth step: $item"
                 usage
                 exit 1
                 ;;
@@ -96,17 +96,17 @@ else
 fi
 
 if [[ "$RUN_GIT" -eq 0 && "$RUN_SSH" -eq 0 && "$RUN_GPG" -eq 0 ]]; then
-    echo "No auth steps selected. Skipping."
+    log_warn "No auth steps selected. Skipping."
     exit 0
 fi
 
 if [[ "$RUN_SSH" -eq 1 || "$RUN_GPG" -eq 1 ]]; then
-    echo "--- Installing developer authentication prerequisites ---"
+    log_section "Installing developer authentication prerequisites"
     apt_with_proxy install -y openssh-client
 fi
 
 setup_gpg() {
-    echo "--- Preparing GnuPG directory ---"
+    log_section "Preparing GnuPG directory"
     apt_with_proxy install -y pinentry-gnome3 pinentry-curses
     mkdir -p "$HOME/.gnupg"
     chmod 700 "$HOME/.gnupg"
@@ -141,33 +141,33 @@ setup_gpg() {
 }
 
 setup_ssh() {
-    echo "--- Preparing SSH key ---"
+    log_section "Preparing SSH key"
     mkdir -p "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
     if [[ ! -f "$SSH_KEY_PATH" ]]; then
         if [[ -n "$DEV_EMAIL" ]]; then
             ssh-keygen -t ed25519 -C "$DEV_EMAIL" -f "$SSH_KEY_PATH" -N ""
         else
-            echo "Skipping SSH key generation because no email was provided."
-            echo "Set EMAIL or GIT_AUTHOR_EMAIL before running this step to generate a labeled key."
+            log_warn "Skipping SSH key generation because no email was provided."
+            log_info "Set EMAIL or GIT_AUTHOR_EMAIL before running this step to generate a labeled key."
         fi
     else
-        echo "SSH key already exists: $SSH_KEY_PATH"
+        log_info "SSH key already exists: $SSH_KEY_PATH"
     fi
 }
 
 setup_git() {
-    echo "--- Preparing Git identity defaults ---"
+    log_section "Preparing Git identity defaults"
     if [[ -n "$DEV_NAME" ]]; then
         git config --global user.name "$DEV_NAME"
     else
-        echo "Skipping git user.name because no name was provided."
+        log_warn "Skipping git user.name because no name was provided."
     fi
 
     if [[ -n "$DEV_EMAIL" ]]; then
         git config --global user.email "$DEV_EMAIL"
     else
-        echo "Skipping git user.email because no email was provided."
+        log_warn "Skipping git user.email because no email was provided."
     fi
 
     git config --global init.defaultBranch main
@@ -187,4 +187,4 @@ if [[ "$RUN_GIT" -eq 1 ]]; then
     setup_git
 fi
 
-echo "--- Developer authentication bootstrap complete ---"
+log_ok "Developer authentication bootstrap complete"

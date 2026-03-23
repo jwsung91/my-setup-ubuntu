@@ -5,11 +5,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
 PYENV_VERSION_TO_INSTALL="${1:-}"
 
+source "$SCRIPT_DIR/lib/ui.sh"
 source "$SCRIPT_DIR/lib/proxy.sh"
 load_proxy_settings
 
 install_python_prerequisites() {
-    echo "--- Installing Python build prerequisites ---"
+    log_section "Installing Python build prerequisites"
     apt_with_proxy install -y \
         make build-essential libssl-dev zlib1g-dev libbz2-dev \
         libreadline-dev libsqlite3-dev curl git libncursesw5-dev xz-utils \
@@ -18,12 +19,12 @@ install_python_prerequisites() {
 }
 
 install_pyenv() {
-    echo "--- Installing pyenv ---"
+    log_section "Installing pyenv"
 
     if [[ ! -d "$PYENV_ROOT" ]]; then
         git clone https://github.com/pyenv/pyenv.git "$PYENV_ROOT"
     else
-        echo "pyenv is already installed."
+        log_info "pyenv is already installed."
     fi
 }
 
@@ -36,21 +37,21 @@ install_python_version() {
     fi
 
     if [[ ! -x "$pyenv_bin" ]]; then
-        echo "pyenv binary not found: $pyenv_bin"
+        log_error "pyenv binary not found: $pyenv_bin"
         exit 1
     fi
 
-    echo "--- Installing Python ${version} with pyenv ---"
+    log_section "Installing Python ${version} with pyenv"
     export PYENV_ROOT
     export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$("$pyenv_bin" init - bash)"
     "$pyenv_bin" install --skip-existing "$version"
     "$pyenv_bin" global "$version"
-    echo "Set pyenv global Python to ${version}"
+    log_ok "Set pyenv global Python to ${version}"
 }
 
 ensure_pipx_path() {
-    echo "--- Ensuring pipx path ---"
+    log_section "Ensuring pipx path"
     python3 -m pipx ensurepath >/dev/null 2>&1 || true
 }
 

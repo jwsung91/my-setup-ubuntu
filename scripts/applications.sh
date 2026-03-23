@@ -30,12 +30,12 @@ EOF
 }
 
 if [[ "$ARCH" != "amd64" ]]; then
-    echo "This script supports Ubuntu Desktop amd64 only. Current architecture: $ARCH"
+    log_error "This script supports Ubuntu Desktop amd64 only. Current architecture: $ARCH"
     exit 1
 fi
 
 if [[ "$UBUNTU_VERSION" != "22.04" && "$UBUNTU_VERSION" != "24.04" ]]; then
-    echo "Supported Ubuntu versions are 22.04 and 24.04. Current version: $UBUNTU_VERSION"
+    log_error "Supported Ubuntu versions are 22.04 and 24.04. Current version: $UBUNTU_VERSION"
     exit 1
 fi
 
@@ -65,7 +65,7 @@ select_applications_with_whiptail() {
     read -r -a selected_apps <<< "$selection"
 
     if [[ ${#selected_apps[@]} -eq 0 ]]; then
-        echo "No applications selected. Skipping."
+        log_warn "No applications selected. Skipping."
         return 1
     fi
 
@@ -82,13 +82,13 @@ select_applications_with_whiptail() {
 }
 
 install_prerequisites() {
-    echo "--- Installing application prerequisites ---"
+    log_section "Installing application prerequisites"
     apt_with_proxy update
     apt_with_proxy install -y curl wget apt-transport-https gnupg ca-certificates
 }
 
 install_vscode() {
-    echo "--- Installing VS Code ---"
+    log_section "Installing VS Code"
     sudo install -d -m 0755 /etc/apt/keyrings
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
         | gpg --dearmor \
@@ -101,7 +101,7 @@ install_vscode() {
 }
 
 install_chrome() {
-    echo "--- Installing Google Chrome ---"
+    log_section "Installing Google Chrome"
     CHROME_DEB="$TMP_DIR/google-chrome-stable_current_amd64.deb"
     wget -O "$CHROME_DEB" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     apt_with_proxy install -y "$CHROME_DEB"
@@ -135,7 +135,7 @@ else
                 INSTALL_CHROME=1
                 ;;
             *)
-                echo "Unknown application: $app"
+                log_error "Unknown application: $app"
                 usage
                 exit 1
                 ;;
@@ -144,7 +144,7 @@ else
 fi
 
 if [[ "$INSTALL_VSCODE" -eq 0 && "$INSTALL_CHROME" -eq 0 ]]; then
-    echo "No applications selected. Skipping."
+    log_warn "No applications selected. Skipping."
     exit 0
 fi
 

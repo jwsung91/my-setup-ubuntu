@@ -36,7 +36,7 @@ print_profiles() {
     done < <(list_proxy_profiles)
 
     if [[ "$found" -eq 0 ]]; then
-        echo "No proxy profiles found in $PROXY_DIR"
+        log_warn "No proxy profiles found in $PROXY_DIR"
     fi
 }
 
@@ -45,22 +45,22 @@ activate_profile() {
     local profile_path="$PROXY_DIR/${profile_name}.env"
 
     if [[ ! -f "$profile_path" ]]; then
-        echo "Proxy profile not found: $profile_name"
+        log_error "Proxy profile not found: $profile_name"
         exit 1
     fi
 
     rm -f "$ACTIVE_PROXY_FILE"
     ln -s "$profile_path" "$ACTIVE_PROXY_FILE"
-    echo "Activated proxy profile: $profile_name"
-    echo "Active file: $ACTIVE_PROXY_FILE -> $profile_path"
+    log_ok "Activated proxy profile: $profile_name"
+    log_info "Active file: $ACTIVE_PROXY_FILE -> $profile_path"
 }
 
 clear_active_proxy() {
     if [[ -e "$ACTIVE_PROXY_FILE" || -L "$ACTIVE_PROXY_FILE" ]]; then
         rm -f "$ACTIVE_PROXY_FILE"
-        echo "Cleared active proxy file: $ACTIVE_PROXY_FILE"
+        log_ok "Cleared active proxy file: $ACTIVE_PROXY_FILE"
     else
-        echo "No active proxy file to clear."
+        log_warn "No active proxy file to clear."
     fi
 }
 
@@ -69,7 +69,7 @@ auto_select_proxy() {
     mapfile -t profiles < <(list_proxy_profiles)
 
     if [[ -e "$ACTIVE_PROXY_FILE" || -L "$ACTIVE_PROXY_FILE" ]]; then
-        echo "Using existing proxy file: $ACTIVE_PROXY_FILE"
+        log_info "Using existing proxy file: $ACTIVE_PROXY_FILE"
         return 0
     fi
 
@@ -78,8 +78,8 @@ auto_select_proxy() {
         return 0
     fi
 
-    echo "Proxy auto-selection skipped."
-    echo "Reason: ${#profiles[@]} profile(s) found in $PROXY_DIR and no active .proxy.env file."
+    log_warn "Proxy auto-selection skipped."
+    log_info "Reason: ${#profiles[@]} profile(s) found in $PROXY_DIR and no active .proxy.env file."
 }
 
 select_profile_with_whiptail() {
@@ -90,8 +90,8 @@ select_profile_with_whiptail() {
     mapfile -t profiles < <(list_proxy_profiles)
 
     if [[ ${#profiles[@]} -eq 0 ]]; then
-        echo "No proxy profiles found in $PROXY_DIR"
-        echo "Create one from .proxy.env.example and place it under proxy/."
+        log_warn "No proxy profiles found in $PROXY_DIR"
+        log_info "Create one from .proxy.env.example and place it under proxy/."
         return 1
     fi
 
@@ -119,7 +119,7 @@ prompt_for_proxy_profile() {
     read -r profile_name
 
     if [[ -z "$profile_name" ]]; then
-        echo "No proxy profile selected. Skipping."
+        log_warn "No proxy profile selected. Skipping."
         return 1
     fi
 
@@ -150,7 +150,7 @@ case "${1:-interactive}" in
         ;;
     use)
         if [[ $# -lt 2 ]]; then
-            echo "Missing proxy profile name."
+            log_error "Missing proxy profile name."
             usage
             exit 1
         fi
@@ -160,7 +160,7 @@ case "${1:-interactive}" in
         clear_active_proxy
         ;;
     *)
-        echo "Unknown proxy command: $1"
+        log_error "Unknown proxy command: $1"
         usage
         exit 1
         ;;

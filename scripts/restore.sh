@@ -46,7 +46,7 @@ select_restore_with_whiptail() {
     read -r -a selected_items <<< "$selection"
 
     if [[ ${#selected_items[@]} -eq 0 ]]; then
-        echo "No restore targets selected. Skipping."
+        log_warn "No restore targets selected. Skipping."
         return 1
     fi
 
@@ -73,7 +73,7 @@ select_backup_for_target() {
 
     mapfile -t backups < <(ls -1t "${target}.bak."* 2>/dev/null)
     if [[ ${#backups[@]} -eq 0 ]]; then
-        echo ""
+        printf '\n'
         return 0
     fi
 
@@ -103,7 +103,7 @@ restore_latest_backup() {
     local backup_path
 
     if ! backup_path="$(select_backup_for_target "$target" "$title")"; then
-        echo "Restore cancelled for $target"
+        log_warn "Restore cancelled for $target"
         return
     fi
 
@@ -112,28 +112,28 @@ restore_latest_backup() {
     fi
 
     if [[ -z "${backup_path:-}" ]]; then
-        echo "No backup found for $target"
+        log_warn "No backup found for $target"
         return
     fi
 
     cp "$backup_path" "$target"
-    echo "Restored $target from $backup_path"
+    log_ok "Restored $target from $backup_path"
 }
 
 restore_zsh() {
-    echo "--- Restoring zsh backups ---"
+    log_section "Restoring zsh backups"
     restore_latest_backup "$ZSH_USER_TARGET" "Restore ~/.zshrc"
     restore_latest_backup "$ZSH_MANAGED_TARGET" "Restore ~/.zshrc.my-setup-ubuntu"
 }
 
 restore_git() {
-    echo "--- Restoring git backups ---"
+    log_section "Restoring git backups"
     restore_latest_backup "$GIT_USER_TARGET" "Restore ~/.gitconfig"
     restore_latest_backup "$GIT_MANAGED_TARGET" "Restore ~/.gitconfig.my-setup-ubuntu"
 }
 
 restore_vim() {
-    echo "--- Restoring vim backups ---"
+    log_section "Restoring vim backups"
     restore_latest_backup "$VIM_USER_TARGET" "Restore ~/.vimrc"
     restore_latest_backup "$VIM_MANAGED_TARGET" "Restore ~/.vimrc.my-setup-ubuntu"
 }
@@ -149,7 +149,7 @@ if [[ $# -eq 0 ]]; then
     if command -v whiptail >/dev/null 2>&1; then
         select_restore_with_whiptail || exit 0
     else
-        echo "No restore targets selected. Skipping."
+        log_warn "No restore targets selected. Skipping."
         exit 0
     fi
 else
@@ -170,7 +170,7 @@ else
                 RUN_VIM=1
                 ;;
             *)
-                echo "Unknown restore target: $item"
+                log_error "Unknown restore target: $item"
                 usage
                 exit 1
                 ;;
@@ -179,7 +179,7 @@ else
 fi
 
 if [[ "$RUN_ZSH" -eq 0 && "$RUN_GIT" -eq 0 && "$RUN_VIM" -eq 0 ]]; then
-    echo "No restore targets selected. Skipping."
+    log_warn "No restore targets selected. Skipping."
     exit 0
 fi
 

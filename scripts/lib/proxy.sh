@@ -1,6 +1,9 @@
 #!/bin/bash
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$LIB_DIR/ui.sh"
+
+PROJECT_ROOT="$(cd "$LIB_DIR/../.." && pwd)"
 PROXY_ENV_FILE="${MY_SETUP_PROXY_FILE:-$PROJECT_ROOT/.proxy.env}"
 
 sync_proxy_environment() {
@@ -28,7 +31,7 @@ load_proxy_settings() {
         set -a
         source "$PROXY_ENV_FILE"
         set +a
-        echo "Loaded proxy settings from $PROXY_ENV_FILE"
+        log_info "Loaded proxy settings from $PROXY_ENV_FILE"
     fi
 
     sync_proxy_environment

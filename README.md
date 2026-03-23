@@ -44,6 +44,7 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 11. **Developer authentication**: prepares baseline Git identity settings and optional SSH or GPG bootstrap
 12. **Verification**: checks required and optional tooling separately, prints a summary, and fails if required tools are missing
 13. **Restore**: restores the latest backup for managed config targets when you need to roll back
+14. **Shared terminal UI**: uses common `scripts/lib/ui.sh` helpers for whiptail styling and colored log output
 
 ## Supported Environment
 

@@ -30,7 +30,7 @@ select_tools_with_whiptail() {
     selection=$(
         whiptail \
             --title "Developer Tools" \
-            --checklist "Select the CLI tools to install" \
+            --checklist "Select the CLI tools to install (Press <Space> to toggle, <Enter> to confirm)" \
             20 76 10 \
             "ripgrep" "Fast recursive search" ON \
             "fd" "Fast file finder" ON \

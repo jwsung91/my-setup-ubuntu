@@ -30,7 +30,7 @@ select_dev_auth_with_whiptail() {
     selection=$(
         whiptail \
             --title "Developer Auth" \
-            --checklist "Select the auth steps to run" \
+            --checklist "Select the auth steps to run (Press <Space> to toggle, <Enter> to confirm)" \
             16 72 6 \
             "git" "Git identity defaults" ON \
             "ssh" "SSH key bootstrap" ON \

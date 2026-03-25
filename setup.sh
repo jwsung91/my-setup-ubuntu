@@ -162,7 +162,7 @@ select_steps_with_whiptail() {
     selection=$(
         whiptail \
             --title "Ubuntu Bootstrap" \
-            --checklist "Select the steps to run" \
+            --checklist "Select the steps to run (Press <Space> to toggle, <Enter> to confirm)" \
             20 90 12 \
             "preflight" "Check prerequisites before changes" OFF \
             "proxy" "Activate a proxy profile" OFF \

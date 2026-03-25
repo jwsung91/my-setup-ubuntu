@@ -34,7 +34,7 @@ select_restore_with_whiptail() {
     selection=$(
         whiptail \
             --title "Restore" \
-            --checklist "Select the config targets to restore" \
+            --checklist "Select the config targets to restore (Press <Space> to toggle, <Enter> to confirm)" \
             16 72 6 \
             "zsh" "Restore ~/.zshrc backups" OFF \
             "git" "Restore ~/.gitconfig backups" OFF \

@@ -54,7 +54,7 @@ select_applications_with_whiptail() {
     selection=$(
         whiptail \
             --title "Applications" \
-            --checklist "Select the applications to install" \
+            --checklist "Select the applications to install (Press <Space> to toggle, <Enter> to confirm)" \
             15 70 5 \
             "vscode" "Visual Studio Code" OFF \
             "chrome" "Google Chrome" OFF \

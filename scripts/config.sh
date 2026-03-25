@@ -52,7 +52,7 @@ select_config_with_whiptail() {
     selection=$(
         whiptail \
             --title "Config" \
-            --checklist "Select the config targets to apply" \
+            --checklist "Select the config targets to apply (Press <Space> to toggle, <Enter> to confirm)" \
             16 72 6 \
             "zsh" "Managed zsh config" ON \
             "git" "Managed git config" ON \

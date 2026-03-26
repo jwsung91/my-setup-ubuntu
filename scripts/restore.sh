@@ -85,7 +85,7 @@ select_backup_for_target() {
         selection=$(
             whiptail \
                 --title "$title" \
-                --menu "Select the backup to restore" \
+                --menu "Select the backup to restore (Press <Enter> to confirm)" \
                 20 90 10 \
                 "${menu_items[@]}" \
                 3>&1 1>&2 2>&3

@@ -102,7 +102,7 @@ select_profile_with_whiptail() {
     selection=$(
         whiptail \
             --title "Proxy" \
-            --menu "Select the proxy profile to activate" \
+            --menu "Select the proxy profile to activate (Press <Enter> to confirm)" \
             20 90 10 \
             "${menu_items[@]}" \
             3>&1 1>&2 2>&3

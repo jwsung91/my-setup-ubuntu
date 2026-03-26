@@ -22,7 +22,8 @@ install_pyenv() {
     log_section "Installing pyenv"
 
     if [[ ! -d "$PYENV_ROOT" ]]; then
-        git clone https://github.com/pyenv/pyenv.git "$PYENV_ROOT"
+        # ⚡ Bolt optimization: Shallow clone to save time/bandwidth
+        git clone --depth=1 https://github.com/pyenv/pyenv.git "$PYENV_ROOT"
     else
         log_info "pyenv is already installed."
     fi

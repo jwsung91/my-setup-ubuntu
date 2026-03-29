@@ -9,3 +9,7 @@
 ## 2025-02-14 - Unconditional Apt Update and Install for Already Installed Tools
 **Learning:** Unconditionally running `apt update` and `apt install` for multiple developer tools in a loop or array adds significant network overhead and execution time when the tools are already installed.
 **Action:** Check if the tool is already available via `command -v <app>` before appending its package to the installation list. If the list is empty, early return or skip `apt update` and `apt install` entirely.
+
+## 2024-05-24 - [Early Returns Before Prerequisites]
+**Learning:** In setup scripts, checking application installation states (e.g., using `command -v`) before running prerequisite steps like `apt update` avoids unnecessary and expensive operations if the target application is already installed.
+**Action:** Always implement early returns by checking `command -v` before downloading prerequisites or large files if the target application is already installed.

@@ -89,11 +89,6 @@ install_prerequisites() {
 
 install_vscode() {
     log_section "Installing VS Code"
-    # ⚡ Bolt optimization: Add early return to skip unnecessary processing
-    if command -v code >/dev/null 2>&1; then
-        log_info "VS Code is already installed."
-        return 0
-    fi
 
     sudo install -d -m 0755 /etc/apt/keyrings
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
@@ -108,11 +103,6 @@ install_vscode() {
 
 install_chrome() {
     log_section "Installing Google Chrome"
-    # ⚡ Bolt optimization: Add early return to skip downloading large deb file if already installed
-    if command -v google-chrome-stable >/dev/null 2>&1 || command -v google-chrome >/dev/null 2>&1; then
-        log_info "Google Chrome is already installed."
-        return 0
-    fi
 
     CHROME_DEB="$TMP_DIR/google-chrome-stable_current_amd64.deb"
     wget -O "$CHROME_DEB" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -153,6 +143,17 @@ else
                 ;;
         esac
     done
+fi
+
+# ⚡ Bolt optimization: Add early returns by checking if apps are installed to skip unnecessary processing
+if [[ "$INSTALL_VSCODE" -eq 1 ]] && command -v code >/dev/null 2>&1; then
+    log_info "VS Code is already installed."
+    INSTALL_VSCODE=0
+fi
+
+if [[ "$INSTALL_CHROME" -eq 1 ]] && { command -v google-chrome-stable >/dev/null 2>&1 || command -v google-chrome >/dev/null 2>&1; }; then
+    log_info "Google Chrome is already installed."
+    INSTALL_CHROME=0
 fi
 
 if [[ "$INSTALL_VSCODE" -eq 0 && "$INSTALL_CHROME" -eq 0 ]]; then

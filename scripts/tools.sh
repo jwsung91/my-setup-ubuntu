@@ -129,17 +129,22 @@ fi
 
 PACKAGES=()
 
-[[ "$RUN_RIPGREP" -eq 1 ]] && PACKAGES+=("ripgrep")
-[[ "$RUN_FD" -eq 1 ]] && PACKAGES+=("fd-find")
-[[ "$RUN_FZF" -eq 1 ]] && PACKAGES+=("fzf")
-[[ "$RUN_BAT" -eq 1 ]] && PACKAGES+=("bat")
-[[ "$RUN_JQ" -eq 1 ]] && PACKAGES+=("jq")
-[[ "$RUN_TMUX" -eq 1 ]] && PACKAGES+=("tmux")
-[[ "$RUN_XCLIP" -eq 1 ]] && PACKAGES+=("xclip")
+# ⚡ Bolt optimization: Add early returns by checking if tool is installed to skip unnecessary processing
+[[ "$RUN_RIPGREP" -eq 1 ]] && ! command -v rg >/dev/null 2>&1 && PACKAGES+=("ripgrep")
+[[ "$RUN_FD" -eq 1 ]] && ! command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1 && PACKAGES+=("fd-find")
+[[ "$RUN_FZF" -eq 1 ]] && ! command -v fzf >/dev/null 2>&1 && PACKAGES+=("fzf")
+[[ "$RUN_BAT" -eq 1 ]] && ! command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1 && PACKAGES+=("bat")
+[[ "$RUN_JQ" -eq 1 ]] && ! command -v jq >/dev/null 2>&1 && PACKAGES+=("jq")
+[[ "$RUN_TMUX" -eq 1 ]] && ! command -v tmux >/dev/null 2>&1 && PACKAGES+=("tmux")
+[[ "$RUN_XCLIP" -eq 1 ]] && ! command -v xclip >/dev/null 2>&1 && PACKAGES+=("xclip")
 
-log_section "Installing developer CLI tools"
-apt_with_proxy update
-apt_with_proxy install -y "${PACKAGES[@]}"
+if [[ ${#PACKAGES[@]} -gt 0 ]]; then
+    log_section "Installing developer CLI tools"
+    apt_with_proxy update
+    apt_with_proxy install -y "${PACKAGES[@]}"
+else
+    log_info "All selected tools are already installed."
+fi
 
 if [[ "$RUN_BAT" -eq 1 ]] && command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
     mkdir -p "$HOME/.local/bin"

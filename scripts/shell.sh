@@ -9,7 +9,13 @@ load_proxy_settings
 
 install_zsh() {
     log_section "Installing Zsh and setting it as the default shell"
-    apt_with_proxy install -y zsh
+
+    # ⚡ Bolt optimization: Skip unnecessary apt processing
+    if ! command -v zsh >/dev/null 2>&1; then
+        apt_with_proxy install -y zsh
+    else
+        log_info "Zsh is already installed."
+    fi
 
     local zsh_path
     local current_shell

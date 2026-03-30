@@ -17,6 +17,11 @@ trap cleanup EXIT
 
 install_vim() {
     log_section "Installing Vim"
+    # ⚡ Bolt optimization: Add early return to skip unnecessary apt processing
+    if command -v vim >/dev/null 2>&1; then
+        log_info "Vim is already installed."
+        return 0
+    fi
     apt_with_proxy install -y vim
 }
 

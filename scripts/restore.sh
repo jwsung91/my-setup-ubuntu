@@ -40,14 +40,19 @@ select_restore_with_whiptail() {
             "git" "Restore ~/.gitconfig backups" OFF \
             "vim" "Restore ~/.vimrc backups" OFF \
             3>&1 1>&2 2>&3
-    ) || return 1
+    )
+    local ret=$?
+    if [[ $ret -ne 0 ]]; then
+        log_warn "Selection cancelled."
+        return 1
+    fi
 
     selection="${selection//\"/}"
     read -r -a selected_items <<< "$selection"
 
     if [[ ${#selected_items[@]} -eq 0 ]]; then
-        log_warn "No restore targets selected. Skipping."
-        return 1
+        log_info "No restore targets selected. Skipping."
+        return 0
     fi
 
     for item in "${selected_items[@]}"; do
@@ -89,7 +94,12 @@ select_backup_for_target() {
                 20 90 10 \
                 "${menu_items[@]}" \
                 3>&1 1>&2 2>&3
-        ) || return 1
+        )
+        local ret=$?
+        if [[ $ret -ne 0 ]]; then
+            log_warn "Selection cancelled."
+            return 1
+        fi
         printf '%s\n' "$selection"
         return 0
     fi

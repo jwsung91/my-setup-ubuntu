@@ -108,7 +108,12 @@ select_profile_with_whiptail() {
             20 90 10 \
             "${menu_items[@]}" \
             3>&1 1>&2 2>&3
-    ) || return 1
+    )
+    local ret=$?
+    if [[ $ret -ne 0 ]]; then
+        log_warn "Selection cancelled."
+        return 1
+    fi
 
     activate_profile "$selection"
 }

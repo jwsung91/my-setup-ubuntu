@@ -58,14 +58,19 @@ select_config_with_whiptail() {
             "git" "Managed git config" ON \
             "vim" "Managed vim config" ON \
             3>&1 1>&2 2>&3
-    ) || return 1
+    )
+    local ret=$?
+    if [[ $ret -ne 0 ]]; then
+        log_warn "Selection cancelled."
+        return 1
+    fi
 
     selection="${selection//\"/}"
     read -r -a selected_items <<< "$selection"
 
     if [[ ${#selected_items[@]} -eq 0 ]]; then
-        log_warn "No config targets selected. Skipping."
-        return 1
+        log_info "No config targets selected. Skipping."
+        return 0
     fi
 
     for item in "${selected_items[@]}"; do

@@ -178,13 +178,18 @@ select_steps_with_whiptail() {
             "restore" "Restore latest config backups" OFF \
             "verify" "Tooling verification" OFF \
             3>&1 1>&2 2>&3
-    ) || return 1
+    )
+    local ret=$?
+    if [[ $ret -ne 0 ]]; then
+        log_warn "Selection cancelled."
+        return 1
+    fi
 
     selection="${selection//\"/}"
     read -r -a selected_steps <<< "$selection"
 
     if [[ ${#selected_steps[@]} -eq 0 ]]; then
-        log_warn "No steps selected. Exiting."
+        log_info "No steps selected. Exiting."
         return 1
     fi
 
@@ -207,10 +212,7 @@ chmod +x scripts/*.sh
 if [[ $# -eq 0 || "$1" == "select" ]]; then
     log_info "No steps were passed. Starting interactive selection."
     if command -v whiptail >/dev/null 2>&1; then
-        if ! select_steps_with_whiptail; then
-            log_warn "Selection cancelled."
-            exit 0
-        fi
+        select_steps_with_whiptail || exit 0
     else
         prompt_step "preflight" "check prerequisites before changes"
         prompt_step "proxy" "activate a proxy profile"

@@ -17,7 +17,19 @@ trap cleanup EXIT
 
 log_section "Installing the D2Coding font"
 mkdir -p "$FONT_DIR"
-apt_with_proxy install -y unzip ruby-full
+
+# ⚡ Bolt optimization: Add early returns to skip unnecessary apt processing
+PACKAGES=()
+if ! fc-list | grep -qi "D2Coding"; then
+    PACKAGES+=("unzip")
+fi
+if ! command -v colorls >/dev/null 2>&1; then
+    PACKAGES+=("ruby-full")
+fi
+
+if [[ ${#PACKAGES[@]} -gt 0 ]]; then
+    apt_with_proxy install -y "${PACKAGES[@]}"
+fi
 
 if ! fc-list | grep -qi "D2Coding"; then
     cd "$TEMP_DIR"

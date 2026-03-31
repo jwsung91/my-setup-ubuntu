@@ -43,7 +43,8 @@ prompt_application() {
     local name="$1"
     local answer
 
-    read -r -p "Install ${name}? [y/N] " answer
+    log_ask "Install ${UI_BOLD}${name}${UI_RESET}? [y/N] "
+    read -r answer
     [[ "$answer" =~ ^[Yy]$ ]]
 }
 

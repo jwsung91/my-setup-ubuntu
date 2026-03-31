@@ -147,7 +147,8 @@ prompt_step() {
     local description="$2"
     local answer
 
-    read -r -p "Run ${step} (${description})? [y/N] " answer
+    log_ask "Run ${UI_BOLD}${step}${UI_RESET} (${description})? [y/N] "
+    read -r answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         run_step_spec "$step"
     else

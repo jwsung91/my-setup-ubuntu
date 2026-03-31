@@ -124,7 +124,7 @@ prompt_for_proxy_profile() {
     if ! print_profiles; then
         return 1
     fi
-    printf 'Enter proxy profile name to activate: '
+    log_ask "Enter proxy profile name to activate: "
     read -r profile_name
 
     if [[ -z "$profile_name" ]]; then

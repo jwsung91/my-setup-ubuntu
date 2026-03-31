@@ -9,3 +9,7 @@
 ## 2023-11-20 - [Distinguishing cancellation from empty selection]
 **Learning:** In interactive CLI prompts using `whiptail`, treating an empty checklist submission the same as a manual cancellation (`ESC`/`Cancel`) leads to misleading warnings ("Selection cancelled.") or treats intentional skips as errors.
 **Action:** Always intercept the exit code of `whiptail` explicitly. If it returns non-zero, it was cancelled, so log properly and return early. If it returns 0 but the selection is empty, treat it as a successful intentional skip.
+
+## 2025-03-25 - CLI Prompt Standardization
+**Learning:** Raw `read -p` and `printf` prompts without visual distinction blend in with terminal output, causing users to miss the prompt or get confused about what input is expected. This reduces parsing speed and accessibility.
+**Action:** Standardize interactive CLI prompt styling across the application using a dedicated helper function (like `log_ask`) that provides consistent, recognizable visual cues (e.g., a colored `[?]` prefix).

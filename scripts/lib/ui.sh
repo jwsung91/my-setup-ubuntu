@@ -47,6 +47,10 @@ if [[ -z "${MY_SETUP_UI_LOADED:-}" ]]; then
         log_line "WARN" "$UI_YELLOW" "$@"
     }
 
+    log_ask() {
+        printf '%b[?]%b %s' "${UI_CYAN}${UI_BOLD}" "$UI_RESET" "$*"
+    }
+
     log_error() {
         printf '%b[ERROR]%b %s\n' "${UI_RED}${UI_BOLD}" "$UI_RESET" "$*" >&2
     }

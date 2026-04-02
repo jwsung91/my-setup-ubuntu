@@ -23,6 +23,21 @@ Usage:
 EOF
 }
 
+prompt_tool() {
+    local target="$1"
+    local description="$2"
+    local answer
+
+    if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive terminal detected. Skipping ${target}."
+        return 1
+    fi
+
+    log_ask "Install ${UI_BOLD}${target}${UI_RESET} (${description})? [y/N] "
+    read -r answer
+    [[ "$answer" =~ ^[Yy]$ ]]
+}
+
 select_tools_with_whiptail() {
     local selection
     local -a selected_items
@@ -79,11 +94,11 @@ if [[ $# -eq 0 ]]; then
     if command -v whiptail >/dev/null 2>&1; then
         select_tools_with_whiptail || exit 0
     else
-        RUN_RIPGREP=1
-        RUN_FD=1
-        RUN_FZF=1
-        RUN_BAT=1
-        RUN_JQ=1
+        prompt_tool "ripgrep" "Fast recursive search" && RUN_RIPGREP=1
+        prompt_tool "fd" "Fast file finder" && RUN_FD=1
+        prompt_tool "fzf" "Fuzzy finder" && RUN_FZF=1
+        prompt_tool "bat" "Cat with syntax highlighting" && RUN_BAT=1
+        prompt_tool "jq" "JSON processor" && RUN_JQ=1
     fi
 else
     for item in "$@"; do

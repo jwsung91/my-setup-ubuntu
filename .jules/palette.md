@@ -13,3 +13,6 @@
 ## 2025-03-25 - CLI Prompt Standardization
 **Learning:** Raw `read -p` and `printf` prompts without visual distinction blend in with terminal output, causing users to miss the prompt or get confused about what input is expected. This reduces parsing speed and accessibility.
 **Action:** Standardize interactive CLI prompt styling across the application using a dedicated helper function (like `log_ask`) that provides consistent, recognizable visual cues (e.g., a colored `[?]` prefix).
+## 2025-04-02 - Ensure Destructive / Configuration CLI Actions Require Confirmation
+**Learning:** Silently falling back to applying all changes (or installing all packages) when an interactive CLI framework like `whiptail` fails or is unavailable creates a poor, unexpected UX. Destructive or significant actions should require explicit confirmation rather than silently proceeding.
+**Action:** When creating CLI fallbacks for interactive tools, use `log_ask` (with non-interactive environment handling via `[[ ! -t 0 ]]`) to require explicit `y/N` confirmation for each action, instead of silently assuming default selections.

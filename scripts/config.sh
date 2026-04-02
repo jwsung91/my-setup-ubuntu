@@ -45,6 +45,21 @@ Usage:
 EOF
 }
 
+prompt_config() {
+    local target="$1"
+    local description="$2"
+    local answer
+
+    if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive terminal detected. Skipping ${target}."
+        return 1
+    fi
+
+    log_ask "Apply ${UI_BOLD}${target}${UI_RESET} (${description})? [y/N] "
+    read -r answer
+    [[ "$answer" =~ ^[Yy]$ ]]
+}
+
 select_config_with_whiptail() {
     local selection
     local -a selected_items
@@ -203,9 +218,9 @@ if [[ $# -eq 0 ]]; then
     if command -v whiptail >/dev/null 2>&1; then
         select_config_with_whiptail || exit 0
     else
-        RUN_ZSH=1
-        RUN_GIT=1
-        RUN_VIM=1
+        prompt_config "zsh" "Managed zsh config" && RUN_ZSH=1
+        prompt_config "git" "Managed git config" && RUN_GIT=1
+        prompt_config "vim" "Managed vim config" && RUN_VIM=1
     fi
 else
     for item in "$@"; do

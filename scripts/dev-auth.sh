@@ -23,6 +23,21 @@ Usage:
 EOF
 }
 
+prompt_dev_auth() {
+    local target="$1"
+    local description="$2"
+    local answer
+
+    if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive terminal detected. Skipping ${target}."
+        return 1
+    fi
+
+    log_ask "Run ${UI_BOLD}${target}${UI_RESET} (${description})? [y/N] "
+    read -r answer
+    [[ "$answer" =~ ^[Yy]$ ]]
+}
+
 select_dev_auth_with_whiptail() {
     local selection
     local -a selected_items
@@ -71,8 +86,8 @@ if [[ $# -eq 0 ]]; then
     if command -v whiptail >/dev/null 2>&1; then
         select_dev_auth_with_whiptail || exit 0
     else
-        RUN_GIT=1
-        RUN_SSH=1
+        prompt_dev_auth "git" "Git identity defaults" && RUN_GIT=1
+        prompt_dev_auth "ssh" "SSH key bootstrap" && RUN_SSH=1
     fi
 else
     for item in "$@"; do

@@ -11,6 +11,9 @@ This project can install a small set of developer-oriented terminal tools throug
 | `fzf` | `fzf` | Fuzzy finder for files, command history, and custom shell workflows | <https://github.com/junegunn/fzf> |
 | `bat` | `bat` | Syntax-highlighted file viewer, useful as a richer `cat` | <https://github.com/sharkdp/bat> |
 | `jq` | `jq` | Command-line JSON parser and transformer | <https://jqlang.org/> |
+| `zoxide` | Custom | Smarter `cd` command that learns your habits | <https://github.com/ajeetdsouza/zoxide> |
+| `tldr` | `tldr` | Simplified and community-driven man pages | <https://tldr.sh/> |
+| `lazygit` | Custom | Simple terminal UI for git commands | <https://github.com/jesseduffield/lazygit> |
 | `tmux` | `tmux` | Terminal multiplexer for persistent and split terminal sessions | <https://github.com/tmux/tmux/wiki> |
 | `xclip` | `xclip` | Clipboard bridge for X11-based Linux desktops | <https://github.com/astrand/xclip> |
 

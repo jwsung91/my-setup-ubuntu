@@ -35,3 +35,14 @@ if [ -x "$(command -v colorls)" ]; then
     alias la='colorls -a'
     alias ll='colorls -la'
 fi
+
+# Zoxide initialization
+if [ -x "$(command -v zoxide)" ]; then
+    eval "$(zoxide init zsh)"
+    alias cd="z"
+fi
+
+# Lazygit alias
+if [ -x "$(command -v lazygit)" ]; then
+    alias lg='lazygit'
+fi

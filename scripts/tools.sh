@@ -1,190 +1,237 @@
 #!/bin/bash
 set -euo pipefail
 
-RUN_RIPGREP=0
-RUN_FD=0
-RUN_FZF=0
-RUN_BAT=0
-RUN_JQ=0
-RUN_TMUX=0
-RUN_XCLIP=0
-RUN_ZOXIDE=0
-RUN_TLDR=0
-RUN_LAZYGIT=0
+# --- Configuration & Setup ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 source "$SCRIPT_DIR/lib/ui.sh"
 source "$SCRIPT_DIR/lib/proxy.sh"
 load_proxy_settings
 
+# Track which tools to install
+declare -A RUN_TOOLS
+ALL_TOOLS=(
+    "ripgrep" "fd" "fzf" "zoxide" "yazi"        # Search & Navigation
+    "bat" "eza" "dust" "jq" "tldr"              # Modern CLI Enhancements
+    "lazygit" "lazydocker" "btop"               # Development TUIs
+    "tmux" "xclip"                              # System Utilities
+)
+
+for tool in "${ALL_TOOLS[@]}"; do RUN_TOOLS[$tool]=0; done
+
 usage() {
-    cat <<'EOF'
+    cat <<EOF
 Usage:
-  ./scripts/tools.sh                    Choose tools interactively
-  ./scripts/tools.sh all                Install all tools
-  ./scripts/tools.sh ripgrep fd jq      Install selected tools
+  $(basename "$0")                    Choose tools interactively
+  $(basename "$0") all                Install all available tools
+  $(basename "$0") [tool1] [tool2]...  Install specific tools (e.g., ripgrep fd)
+
+Available tools: ${ALL_TOOLS[*]}
 EOF
 }
 
-select_tools_with_whiptail() {
+# --- Individual Installation Functions ---
+
+install_apt_packages() {
+    local -a packages=("$@")
+    if [[ ${#packages[@]} -gt 0 ]]; then
+        log_section "Installing apt packages: ${packages[*]}"
+        apt_with_proxy update
+        apt_with_proxy install -y "${packages[@]}"
+    fi
+}
+
+install_ripgrep() {
+    if ! command -v rg >/dev/null 2>&1; then
+        install_apt_packages "ripgrep"
+    fi
+}
+
+install_fd() {
+    if ! command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+        install_apt_packages "fd-find"
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+        log_ok "Created ~/.local/bin/fd -> fdfind"
+    fi
+}
+
+install_fzf() {
+    if ! command -v fzf >/dev/null 2>&1; then
+        install_apt_packages "fzf"
+    fi
+}
+
+install_bat() {
+    if ! command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+        install_apt_packages "bat"
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
+        log_ok "Created ~/.local/bin/bat -> batcat"
+    fi
+}
+
+install_jq() {
+    if ! command -v jq >/dev/null 2>&1; then
+        install_apt_packages "jq"
+    fi
+}
+
+install_tldr() {
+    if ! command -v tldr >/dev/null 2>&1; then
+        install_apt_packages "tldr"
+    fi
+}
+
+install_btop() {
+    if ! command -v btop >/dev/null 2>&1; then
+        install_apt_packages "btop"
+    fi
+}
+
+install_tmux() {
+    if ! command -v tmux >/dev/null 2>&1; then
+        install_apt_packages "tmux"
+    fi
+}
+
+install_xclip() {
+    if ! command -v xclip >/dev/null 2>&1; then
+        install_apt_packages "xclip"
+    fi
+}
+
+install_zoxide() {
+    if ! command -v zoxide >/dev/null 2>&1; then
+        log_section "Installing zoxide"
+        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+        log_ok "zoxide installed"
+    fi
+}
+
+install_lazygit() {
+    if ! command -v lazygit >/dev/null 2>&1; then
+        log_section "Installing lazygit"
+        local version=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+        curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${version}_Linux_x86_64.tar.gz"
+        tar xf lazygit.tar.gz lazygit
+        install lazygit "$HOME/.local/bin"
+        rm lazygit lazygit.tar.gz
+        log_ok "lazygit v$version installed to ~/.local/bin"
+    fi
+}
+
+install_lazydocker() {
+    if ! command -v lazydocker >/dev/null 2>&1; then
+        log_section "Installing lazydocker"
+        local version=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+        curl -Lo lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/latest/download/lazydocker_${version}_Linux_x86_64.tar.gz"
+        tar xf lazydocker.tar.gz lazydocker
+        install lazydocker "$HOME/.local/bin"
+        rm lazydocker lazydocker.tar.gz
+        log_ok "lazydocker v$version installed to ~/.local/bin"
+    fi
+}
+
+install_eza() {
+    if ! command -v eza >/dev/null 2>&1; then
+        log_section "Installing eza"
+        sudo apt-get update && sudo apt-get install -y gpg wget
+        sudo mkdir -p /etc/apt/keyrings
+        wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+        sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+        sudo apt-get update
+        sudo apt-get install -y eza
+        log_ok "eza installed"
+    fi
+}
+
+install_dust() {
+    if ! command -v dust >/dev/null 2>&1; then
+        log_section "Installing dust"
+        local version=$(curl -s "https://api.github.com/repos/bootandy/dust/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+        curl -Lo dust.tar.gz "https://github.com/bootandy/dust/releases/latest/download/dust-v${version}-x86_64-unknown-linux-gnu.tar.gz"
+        tar xf dust.tar.gz --strip-components=1
+        install dust "$HOME/.local/bin"
+        rm dust dust.tar.gz
+        log_ok "dust v$version installed to ~/.local/bin"
+    fi
+}
+
+install_yazi() {
+    if ! command -v yazi >/dev/null 2>&1; then
+        log_section "Installing yazi"
+        local version=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+        curl -Lo yazi.zip "https://github.com/sxyazi/yazi/releases/latest/download/yazi-x86_64-unknown-linux-musl.zip"
+        unzip -q yazi.zip
+        cd yazi-x86_64-unknown-linux-musl
+        install yazi ya "$HOME/.local/bin"
+        cd ..
+        rm -rf yazi.zip yazi-x86_64-unknown-linux-musl
+        log_ok "yazi v$version installed to ~/.local/bin"
+    fi
+}
+
+# --- Main Logic ---
+
+select_tools_interactive() {
     local selection
-    local -a selected_items
+    selection=$(whiptail --title "Developer Tools" --checklist \
+        "Select CLI tools to install (Space to toggle, Enter to confirm)" 25 85 16 \
+        "---" "SEARCH & NAVIGATION ---" OFF \
+        "ripgrep" "Fast recursive text search (rg)" ON \
+        "fd" "Fast file finder (fd-find)" ON \
+        "fzf" "Fuzzy finder for shell" ON \
+        "zoxide" "Smarter cd command" ON \
+        "yazi" "Rust-based terminal file manager" ON \
+        "--- " "MODERN CLI ENHANCEMENTS ---" OFF \
+        "bat" "Cat with syntax highlighting" ON \
+        "eza" "Modern ls replacement with icons" ON \
+        "dust" "Intuitive disk usage (du) replacement" ON \
+        "jq" "JSON processor" ON \
+        "tldr" "Simplified man pages" ON \
+        "---  " "DEVELOPMENT TUIs ---" OFF \
+        "lazygit" "Simple TUI for git" ON \
+        "lazydocker" "Simple TUI for docker" ON \
+        "btop" "Modern resource monitor" ON \
+        "---   " "SYSTEM UTILITIES ---" OFF \
+        "tmux" "Terminal multiplexer" OFF \
+        "xclip" "Clipboard utility for X11" OFF \
+        3>&1 1>&2 2>&3) || return 1
 
-    selection=$(
-        whiptail \
-            --title "Developer Tools" \
-            --checklist "Select the CLI tools to install (Press <Space> to toggle, <Enter> to confirm)" \
-            22 76 12 \
-            "ripgrep" "Fast recursive search" ON \
-            "fd" "Fast file finder" ON \
-            "fzf" "Fuzzy finder" ON \
-            "bat" "Cat with syntax highlighting" ON \
-            "jq" "JSON processor" ON \
-            "zoxide" "Smarter cd command" ON \
-            "tldr" "Simplified man pages" ON \
-            "lazygit" "TUI for Git" ON \
-            "tmux" "Terminal multiplexer" OFF \
-            "xclip" "Clipboard utility for X11" OFF \
-            3>&1 1>&2 2>&3
-    )
-    local ret=$?
-    if [[ $ret -ne 0 ]]; then
-        log_warn "Selection cancelled."
-        return 1
-    fi
-
-    selection="${selection//\"/}"
-    read -r -a selected_items <<< "$selection"
-
-    if [[ ${#selected_items[@]} -eq 0 ]]; then
-        log_info "No tools selected. Skipping."
-        return 0
-    fi
-
-    for item in "${selected_items[@]}"; do
-        case "$item" in
-            ripgrep) RUN_RIPGREP=1 ;;
-            fd) RUN_FD=1 ;;
-            fzf) RUN_FZF=1 ;;
-            bat) RUN_BAT=1 ;;
-            jq) RUN_JQ=1 ;;
-            zoxide) RUN_ZOXIDE=1 ;;
-            tldr) RUN_TLDR=1 ;;
-            lazygit) RUN_LAZYGIT=1 ;;
-            tmux) RUN_TMUX=1 ;;
-            xclip) RUN_XCLIP=1 ;;
-        esac
+    for tool in $selection; do
+        tool=$(echo "$tool" | tr -d '"')
+        if [[ -n "${RUN_TOOLS[$tool]:-}" ]]; then
+            RUN_TOOLS[$tool]=1
+        fi
     done
 }
 
-if [[ $# -gt 0 && ( "$1" == "--help" || "$1" == "-h" ) ]]; then
-    usage
-    exit 0
-fi
-
-configure_whiptail_colors
-
 if [[ $# -eq 0 ]]; then
-    if command -v whiptail >/dev/null 2>&1; then
-        select_tools_with_whiptail || exit 0
-    else
-        RUN_RIPGREP=1
-        RUN_FD=1
-        RUN_FZF=1
-        RUN_BAT=1
-        RUN_JQ=1
-        RUN_ZOXIDE=1
-        RUN_TLDR=1
-        RUN_LAZYGIT=1
-    fi
+    configure_whiptail_colors
+    select_tools_interactive || exit 0
+elif [[ "$1" == "all" ]]; then
+    for tool in "${ALL_TOOLS[@]}"; do RUN_TOOLS[$tool]=1; done
 else
-    for item in "$@"; do
-        case "$item" in
-            all)
-                RUN_RIPGREP=1
-                RUN_FD=1
-                RUN_FZF=1
-                RUN_BAT=1
-                RUN_JQ=1
-                RUN_ZOXIDE=1
-                RUN_TLDR=1
-                RUN_LAZYGIT=1
-                RUN_TMUX=1
-                RUN_XCLIP=1
-                ;;
-            ripgrep) RUN_RIPGREP=1 ;;
-            fd) RUN_FD=1 ;;
-            fzf) RUN_FZF=1 ;;
-            bat) RUN_BAT=1 ;;
-            jq) RUN_JQ=1 ;;
-            zoxide) RUN_ZOXIDE=1 ;;
-            tldr) RUN_TLDR=1 ;;
-            lazygit) RUN_LAZYGIT=1 ;;
-            tmux) RUN_TMUX=1 ;;
-            xclip) RUN_XCLIP=1 ;;
-            *)
-                log_error "Unknown tool target: $item"
-                usage
-                exit 1
-                ;;
-        esac
+    for arg in "$@"; do
+        if [[ -n "${RUN_TOOLS[$arg]:-}" ]]; then
+            RUN_TOOLS[$arg]=1
+        else
+            log_error "Unknown tool: $arg"
+            usage; exit 1
+        fi
     done
 fi
 
-if [[ "$RUN_RIPGREP" -eq 0 && "$RUN_FD" -eq 0 && "$RUN_FZF" -eq 0 && "$RUN_BAT" -eq 0 && "$RUN_JQ" -eq 0 && \
-      "$RUN_ZOXIDE" -eq 0 && "$RUN_TLDR" -eq 0 && "$RUN_LAZYGIT" -eq 0 && \
-      "$RUN_TMUX" -eq 0 && "$RUN_XCLIP" -eq 0 ]]; then
-    log_warn "No tools selected. Skipping."
-    exit 0
-fi
+# Execute installations
+mkdir -p "$HOME/.local/bin"
 
-PACKAGES=()
+for tool in "${ALL_TOOLS[@]}"; do
+    if [[ "${RUN_TOOLS[$tool]}" -eq 1 ]]; then
+        "install_$tool"
+    fi
+done
 
-# ⚡ Bolt optimization: Add early returns by checking if tool is installed to skip unnecessary processing
-[[ "$RUN_RIPGREP" -eq 1 ]] && ! command -v rg >/dev/null 2>&1 && PACKAGES+=("ripgrep")
-[[ "$RUN_FD" -eq 1 ]] && ! command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1 && PACKAGES+=("fd-find")
-[[ "$RUN_FZF" -eq 1 ]] && ! command -v fzf >/dev/null 2>&1 && PACKAGES+=("fzf")
-[[ "$RUN_BAT" -eq 1 ]] && ! command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1 && PACKAGES+=("bat")
-[[ "$RUN_JQ" -eq 1 ]] && ! command -v jq >/dev/null 2>&1 && PACKAGES+=("jq")
-[[ "$RUN_TLDR" -eq 1 ]] && ! command -v tldr >/dev/null 2>&1 && PACKAGES+=("tldr")
-[[ "$RUN_TMUX" -eq 1 ]] && ! command -v tmux >/dev/null 2>&1 && PACKAGES+=("tmux")
-[[ "$RUN_XCLIP" -eq 1 ]] && ! command -v xclip >/dev/null 2>&1 && PACKAGES+=("xclip")
-
-if [[ ${#PACKAGES[@]} -gt 0 ]]; then
-    log_section "Installing developer CLI tools (via apt)"
-    apt_with_proxy update
-    apt_with_proxy install -y "${PACKAGES[@]}"
-else
-    log_info "Selected apt-based tools are already installed."
-fi
-
-# Post-installation for apt packages
-if [[ "$RUN_BAT" -eq 1 ]] && command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
-    log_ok "Created ~/.local/bin/bat -> batcat"
-fi
-
-if [[ "$RUN_FD" -eq 1 ]] && command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
-    log_ok "Created ~/.local/bin/fd -> fdfind"
-fi
-
-# Custom installations for zoxide and lazygit
-if [[ "$RUN_ZOXIDE" -eq 1 ]] && ! command -v zoxide >/dev/null 2>&1; then
-    log_section "Installing zoxide"
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-    log_ok "zoxide installed successfully"
-fi
-
-if [[ "$RUN_LAZYGIT" -eq 1 ]] && ! command -v lazygit >/dev/null 2>&1; then
-    log_section "Installing lazygit"
-    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
-    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-    tar xf lazygit.tar.gz lazygit
-    install lazygit "$HOME/.local/bin"
-    rm lazygit lazygit.tar.gz
-    log_ok "lazygit v$LAZYGIT_VERSION installed to ~/.local/bin"
-fi
-
+log_section "Installation complete!"
+log_info "Make sure ~/.local/bin is in your PATH."
+log_info "Run 'source ~/.zshrc' to apply new aliases."

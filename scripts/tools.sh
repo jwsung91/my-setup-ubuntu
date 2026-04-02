@@ -176,35 +176,62 @@ install_yazi() {
 
 select_tools_interactive() {
     local selection
-    selection=$(whiptail --title "Developer Tools" --checklist \
-        "Select CLI tools to install (Space to toggle, Enter to confirm)" 25 85 16 \
-        "---" "SEARCH & NAVIGATION ---" OFF \
-        "ripgrep" "Fast recursive text search (rg)" ON \
-        "fd" "Fast file finder (fd-find)" ON \
-        "fzf" "Fuzzy finder for shell" ON \
-        "zoxide" "Smarter cd command" ON \
-        "yazi" "Rust-based terminal file manager" ON \
-        "--- " "MODERN CLI ENHANCEMENTS ---" OFF \
-        "bat" "Cat with syntax highlighting" ON \
-        "eza" "Modern ls replacement with icons" ON \
-        "dust" "Intuitive disk usage (du) replacement" ON \
-        "jq" "JSON processor" ON \
-        "tldr" "Simplified man pages" ON \
-        "---  " "DEVELOPMENT TUIs ---" OFF \
-        "lazygit" "Simple TUI for git" ON \
-        "lazydocker" "Simple TUI for docker" ON \
-        "btop" "Modern resource monitor" ON \
-        "---   " "SYSTEM UTILITIES ---" OFF \
-        "tmux" "Terminal multiplexer" OFF \
-        "xclip" "Clipboard utility for X11" OFF \
-        3>&1 1>&2 2>&3) || return 1
+    
+    # 1. Clear input buffer and reset terminal
+    if [[ -t 0 ]]; then
+        stty sane
+        # Flush any pending input
+        read -t 0.1 -n 10000 || true
+    fi
 
-    for tool in $selection; do
-        tool=$(echo "$tool" | tr -d '"')
-        if [[ -n "${RUN_TOOLS[$tool]:-}" ]]; then
-            RUN_TOOLS[$tool]=1
+    # 2. Use 0 0 0 for auto-sizing whiptail
+    selection=$(whiptail --title "Developer Tools" --checklist \
+        "Select CLI tools to install (Space to toggle, Enter to confirm)" 0 0 0 \
+        "ripgrep" "[Search] Fast recursive text search (rg)" ON \
+        "fd" "[Search] Fast file finder (fd-find)" ON \
+        "fzf" "[Search] Fuzzy finder for shell" ON \
+        "zoxide" "[Search] Smarter cd command" ON \
+        "yazi" "[Search] Terminal file manager" ON \
+        "bat" "[Modern] Cat with syntax highlighting" ON \
+        "eza" "[Modern] Modern ls replacement" ON \
+        "dust" "[Modern] Intuitive disk usage (du)" ON \
+        "jq" "[Modern] JSON processor" ON \
+        "tldr" "[Modern] Simplified man pages" ON \
+        "lazygit" "[TUI] Simple TUI for git" ON \
+        "lazydocker" "[TUI] Simple TUI for docker" ON \
+        "btop" "[TUI] Modern resource monitor" ON \
+        "tmux" "[Util] Terminal multiplexer" OFF \
+        "xclip" "[Util] Clipboard utility for X11" OFF \
+        3>&1 1>&2 2>&3)
+
+    local exit_status=$?
+    if [[ $exit_status -ne 0 ]]; then
+        if [[ $exit_status -eq 1 ]]; then
+            log_info "Selection cancelled by user."
+            return 1
+        else
+            log_warn "whiptail failed with status $exit_status. Falling back to default."
+            # Fallback: Install recommended tools
+            for tool in "${ALL_TOOLS[@]}"; do
+                [[ "$tool" != "tmux" && "$tool" != "xclip" ]] && RUN_TOOLS[$tool]=1
+            done
+            return 0
         fi
-    done
+    fi
+
+    # 3. Process results
+    if [[ -n "$selection" ]]; then
+        eval "local selected_items=($selection)"
+        for tool in "${selected_items[@]}"; do
+            tool=$(echo "$tool" | xargs)
+            if [[ -n "${tool}" && "${RUN_TOOLS[$tool]:-}" != "" ]]; then
+                RUN_TOOLS[$tool]=1
+            fi
+        done
+    else
+        log_info "No tools selected."
+    fi
+    return 0
 }
 
 if [[ $# -eq 0 ]]; then

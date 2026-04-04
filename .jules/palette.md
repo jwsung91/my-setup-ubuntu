@@ -13,3 +13,7 @@
 ## 2025-03-25 - CLI Prompt Standardization
 **Learning:** Raw `read -p` and `printf` prompts without visual distinction blend in with terminal output, causing users to miss the prompt or get confused about what input is expected. This reduces parsing speed and accessibility.
 **Action:** Standardize interactive CLI prompt styling across the application using a dedicated helper function (like `log_ask`) that provides consistent, recognizable visual cues (e.g., a colored `[?]` prefix).
+
+## 2025-04-04 - Require confirmation for destructive CLI actions
+**Learning:** Destructive actions in CLI tools (like clearing active configurations) can be accidentally triggered, causing frustration if they proceed without warning.
+**Action:** Always add an explicit user confirmation prompt (e.g., using `log_ask`) before executing destructive actions, especially when falling back from GUI/TUI menus to standard terminal I/O.

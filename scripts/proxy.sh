@@ -59,6 +59,15 @@ activate_profile() {
 
 clear_active_proxy() {
     if [[ -e "$ACTIVE_PROXY_FILE" || -L "$ACTIVE_PROXY_FILE" ]]; then
+        if [[ -t 0 ]]; then
+            local answer
+            log_ask "Are you sure you want to clear the active proxy profile? [y/N] "
+            read -r answer
+            if [[ ! "$answer" =~ ^[Yy]$ ]]; then
+                log_info "Clear operation cancelled."
+                return 0
+            fi
+        fi
         rm -f "$ACTIVE_PROXY_FILE"
         log_ok "Cleared active proxy file: $ACTIVE_PROXY_FILE"
     else

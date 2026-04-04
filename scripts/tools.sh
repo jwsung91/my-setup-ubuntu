@@ -31,11 +31,17 @@ EOF
 
 # --- Individual Installation Functions ---
 
+APT_UPDATED=0
+
 install_apt_packages() {
     local -a packages=("$@")
     if [[ ${#packages[@]} -gt 0 ]]; then
         log_section "Installing apt packages: ${packages[*]}"
-        apt_with_proxy update
+        # ⚡ Bolt optimization: Run apt update only once
+        if [[ "$APT_UPDATED" -eq 0 ]]; then
+            apt_with_proxy update
+            APT_UPDATED=1
+        fi
         apt_with_proxy install -y "${packages[@]}"
     fi
 }

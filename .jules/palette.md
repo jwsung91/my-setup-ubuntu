@@ -17,3 +17,7 @@
 ## $(date +%Y-%m-%d) - Add confirmation for destructive actions in CLI fallbacks
 **Learning:** When falling back from interactive UI tools (like whiptail) to standard terminal I/O, developers sometimes accidentally bypass explicit user confirmation for destructive actions, causing silent overwrites.
 **Action:** Always ensure that destructive actions (like file overwrites) have explicit user confirmation (e.g., using `log_ask`) in both interactive and standard terminal fallback paths, while properly handling fully non-interactive environments via `[[ ! -t 0 ]]`.
+
+## 2025-03-25 - [Graceful Non-Interactive Prompts]
+**Learning:** In CLI automation scripts, `read` commands for user input will hang indefinitely if executed in non-interactive CI/CD environments.
+**Action:** Always include a `[[ ! -t 0 ]]` check at the beginning of custom prompt functions to detect non-interactive environments, returning safely and logging a warning to prevent the script from stalling.

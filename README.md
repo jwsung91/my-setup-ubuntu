@@ -37,7 +37,7 @@ This repository contains automation scripts for quickly bootstrapping an Ubuntu 
 4. **Applications**: lets you choose VS Code and Google Chrome individually
 5. **Terminal setup**: installs Zsh, Oh My Zsh, the `zsh-autosuggestions` and `zsh-syntax-highlighting` plugins, and the `powerlevel10k` theme
 6. **CLI appearance**: installs the D2Coding font and `colorls`
-7. **Developer tools**: installs common terminal tools such as `ripgrep`, `fd`, `fzf`, `bat`, and `jq`
+7. **Developer tools**: installs modern terminal tools such as `ripgrep`, `fd`, `fzf`, `bat`, `jq`, `zoxide`, `tldr`, `lazygit`, `eza`, `btop`, `lazydocker`, `dust`, and `yazi`
 8. **Python bootstrap**: installs `python3`, `pipx`, `pyenv`, and optional pyenv-managed Python versions
 9. **Editor bootstrap**: installs Vim, bootstraps Vundle, and runs a non-interactive Vim plugin sync
 10. **Dotfile management**: backs up existing config files, installs managed config fragments, and adds include or source blocks without duplication
@@ -130,7 +130,12 @@ source ~/.zshrc
 ## Additional Configuration
 
 - **Zsh settings**: add any extra environment variables you need in `dotfiles/zsh/.zshrc`.
-- **Aliases**: when `colorls` is installed, the `ls`, `l`, `la`, and `ll` aliases are applied automatically.
+- **Aliases**: several aliases are applied automatically for a modern terminal experience:
+  - `ls`, `l`, `la`, `ll`: mapped to `eza` (or `colorls` if eza is missing) with icons and git support.
+  - `cd`: mapped to `zoxide` (z) for smarter directory navigation.
+  - `lg`: alias for `lazygit`.
+  - `ldo`: alias for `lazydocker`.
+  - `y`: alias for `yazi`.
 
 ## Restarting the Terminal
 

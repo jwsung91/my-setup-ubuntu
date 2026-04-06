@@ -107,12 +107,25 @@ fi
 
 if [[ "$RUN_SSH" -eq 1 || "$RUN_GPG" -eq 1 ]]; then
     log_section "Installing developer authentication prerequisites"
-    apt_with_proxy install -y openssh-client
+    # ⚡ Bolt optimization: Add early return to skip unnecessary apt processing
+    if ! command -v ssh >/dev/null 2>&1; then
+        apt_with_proxy install -y openssh-client
+    fi
 fi
 
 setup_gpg() {
     log_section "Preparing GnuPG directory"
-    apt_with_proxy install -y pinentry-gnome3 pinentry-curses
+    # ⚡ Bolt optimization: Add early returns to skip unnecessary apt processing
+    local -a GPG_PACKAGES=()
+    if ! command -v pinentry-gnome3 >/dev/null 2>&1; then
+        GPG_PACKAGES+=("pinentry-gnome3")
+    fi
+    if ! command -v pinentry-curses >/dev/null 2>&1; then
+        GPG_PACKAGES+=("pinentry-curses")
+    fi
+    if [[ ${#GPG_PACKAGES[@]} -gt 0 ]]; then
+        apt_with_proxy install -y "${GPG_PACKAGES[@]}"
+    fi
     mkdir -p "$HOME/.gnupg"
     chmod 700 "$HOME/.gnupg"
 

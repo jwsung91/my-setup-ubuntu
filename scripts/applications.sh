@@ -43,6 +43,11 @@ prompt_application() {
     local name="$1"
     local answer
 
+    if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive environment detected. Skipping ${name}."
+        return 1
+    fi
+
     log_ask "Install ${UI_BOLD}${name}${UI_RESET}? [y/N] "
     read -r answer
     [[ "$answer" =~ ^[Yy]$ ]]

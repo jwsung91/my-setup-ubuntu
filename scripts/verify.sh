@@ -81,6 +81,14 @@ check_optional "fd available" fd --version
 check_optional "fzf available" fzf --version
 check_optional "bat available" bat --version
 check_optional "jq available" jq --version
+check_optional "zoxide available" zoxide --version
+check_optional "tldr available" tldr --version
+check_optional "lazygit available" lazygit --version
+check_optional "eza available" eza --version
+check_optional "btop available" btop --version
+check_optional "lazydocker available" lazydocker --version
+check_optional "dust available" dust --version
+check_optional "yazi available" yazi --version
 check_optional "tmux available" tmux -V
 check_optional "xclip available" xclip -version
 check_optional "python3 available" python3 --version

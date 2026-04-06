@@ -121,6 +121,11 @@ select_profile_with_whiptail() {
 prompt_for_proxy_profile() {
     local profile_name
 
+    if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive environment detected. Skipping proxy selection."
+        return 1
+    fi
+
     if ! print_profiles; then
         return 1
     fi

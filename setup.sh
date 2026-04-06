@@ -147,6 +147,11 @@ prompt_step() {
     local description="$2"
     local answer
 
+    if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive environment detected. Skipping ${step}."
+        return 1
+    fi
+
     log_ask "Run ${UI_BOLD}${step}${UI_RESET} (${description})? [y/N] "
     read -r answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then

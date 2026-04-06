@@ -13,3 +13,11 @@
 ## 2024-05-24 - [Early Returns Before Prerequisites]
 **Learning:** In setup scripts, checking application installation states (e.g., using `command -v`) before running prerequisite steps like `apt update` avoids unnecessary and expensive operations if the target application is already installed.
 **Action:** Always implement early returns by checking `command -v` before downloading prerequisites or large files if the target application is already installed.
+
+## 2025-02-14 - Cache expensive redundant external commands
+**Learning:** Calling the same expensive external command (e.g., `fc-list`) multiple times in a script causes redundant sub-process overhead, unnecessarily slowing down execution, especially when the command's output is not expected to change between checks.
+**Action:** Cache the result of expensive or redundant external commands in a local variable if the same check is required multiple times within a script.
+
+## 2025-02-14 - Skip Redundant Apt Updates
+**Learning:** When a setup script iteratively checks and installs multiple small packages (e.g., CLI tools via apt), running `apt update` before every single installation adds unnecessary network overhead and execution time.
+**Action:** Implement a state variable (e.g., `APT_UPDATED=0`) to cache the update state. Wrap `apt update` in a check against this variable and flip it to `1` after the first run to ensure the package list is updated exactly once per script execution.
